@@ -15,7 +15,6 @@ class UserFixtures implements ORMFixtureInterface {
             $user->setPassword('$2a$08$jHZj/wJfcVKlIwr5AvR78euJxYK7Ku5kURNhNx.7.CSIJ3Pq6LEPC');
             $user->setFirstname("rank {$i}");
             $user->setLastname("rank {$i}");
-            $user->setRank($i);
             $user->setDni("1234567{$i}A");
             $user->setAddress("C/ Test");
             $user->setTelephone("6786858475");

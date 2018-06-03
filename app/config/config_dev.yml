@@ -4,9 +4,9 @@ imports:
 parameters:
     database_host: 127.0.0.1
     database_port: 3306
-    database_name: symfony
+    database_name: scm_rest
     database_user: root
-    database_password: 
+    database_password: 1234
     mailer_transport: smtp
     mailer_host: mail.privateemail.com
     mailer_user: admin@scmnight.com
@@ -14,7 +14,7 @@ parameters:
     mailer_encryption: ssl
     secret: ThisTokenIsNotSoSecretChangeIt
     cors_allow_origin: '*'
-    jwt_key_pass_phrase: ok3333
+    jwt_key_pass_phrase: g6GfdDs2453Ax
     websocket_host: 127.0.0.1
     websocket_port: 9846
     

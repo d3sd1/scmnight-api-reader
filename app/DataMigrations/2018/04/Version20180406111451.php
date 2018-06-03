@@ -35,8 +35,8 @@ class Version20180406111451 extends AbstractMigration {
         $this->addSql('INSERT INTO users_genders (gender) VALUES ("M")');
         $this->addSql('INSERT INTO users_genders (gender) VALUES ("F")');
         $this->addSql('INSERT INTO users_genders (gender) VALUES ("NA")');
-        $this->addSql('INSERT INTO permissions SET action="VIEW_USERS"');
-        $this->addSql('INSERT INTO pages_permissions SET permissions_id=1 AND page_url="/rest/users/table/all"');
+        $this->addSql('INSERT INTO permissions (action) VALUES ("VIEW_USERS")');
+        $this->addSql('INSERT INTO pages_permissions (permission_id,page_url) VALUES (1,"/rest/users/table/all")');
         $this->addSql('insert  into `config`(`config`,`value`, dataType) values  ("api_rate_limit_interval_s","20",1)');
         $this->addSql('insert  into `config`(`config`,`value`, dataType) values  ("api_rate_limit_rate","10",1)');
         $this->addSql('insert  into `config`(`config`,`value`, dataType) values  ("maxPersonsInRoom","1000",1)');
