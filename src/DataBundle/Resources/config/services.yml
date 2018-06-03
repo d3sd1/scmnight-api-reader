@@ -1,0 +1,4 @@
+services:
+    Api:
+        class: AppBundle\Utils\App
+        arguments: [ "@doctrine.orm.entity_manager" , "@service_container" ] 

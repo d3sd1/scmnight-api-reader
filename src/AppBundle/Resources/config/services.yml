@@ -1,0 +1,17 @@
+services:
+    app_token_provider:
+        class: AppBundle\Security\AppTokenProvider
+        arguments: ["@doctrine.orm.entity_manager"]
+        public:    false
+    app_token_repository:
+        class:   Doctrine\ORM\EntityManager
+        factory: ["@doctrine.orm.entity_manager", "getRepository"]
+        arguments: ["AppBundle:AppToken"]
+    app_token_authenticator:
+        class:     AppBundle\Security\AppTokenAuthenticator
+        arguments: ["@service_container", "@security.http_utils", "@doctrine.orm.entity_manager"]
+        public:    false
+    computer_repository:
+        class:   Doctrine\ORM\EntityManager
+        factory: ["@doctrine.orm.entity_manager", "getRepository"]
+        arguments: ["AppBundle:Computer"]

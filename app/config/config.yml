@@ -1,0 +1,124 @@
+imports:
+    - { resource: '@DataBundle/Resources/config/config.yml' }
+    - { resource: '@RestBundle/Resources/config/config.yml' }
+    - { resource: "@WebSocketsBundle/Resources/config/services.yml" }
+    - { resource: "@AppBundle/Resources/config/services.yml" }
+    - { resource: security.yml }
+services:
+    websockets.pusher:
+        public: true
+        alias: "gos_web_socket.wamp.pusher"
+    sendlog:
+        public: true
+        alias: "logger"
+    DataFixtures\:
+        resource: '../../src/DataFixtures'
+        tags: ['doctrine.fixture.orm']
+doctrine_migrations:
+    dir_name: "%kernel.root_dir%/DataMigrations"
+    namespace: Application\DataMigrations
+    table_name: scm_versioning
+    name: Versions
+    organize_migrations: BY_YEAR_AND_MONTH
+    custom_template: ~
+    
+jms_serializer:
+    handlers:
+        datetime:
+            default_format: "Y-m-d\\TH:i:sP" # ATOM
+            default_timezone: "UTC" # defaults to whatever timezone set in php.ini or via date_default_timezone_set
+    
+parameters:
+    locale: en
+    jwt_private_key_path: '%kernel.root_dir%/../var/jwt/private.pem'
+    jwt_public_key_path: '%kernel.root_dir%/../var/jwt/public.pem'
+    web_default_token_ttl: 1800
+    web_extended_token_ttl: 3600
+    app_token_ttl: 86400
+    version: 0.5.0
+    
+gos_web_socket:
+    topics:
+        - "@sockets.clients"
+        - "@sockets.auth"
+        - "@sockets.users"
+        - "@sockets.users.manage"
+        - "@sockets.config.manage"
+    shared_config: false
+    server:
+        port: '%websocket_port%'
+        host: '%websocket_host%'
+        origin_check: true
+        router:
+            resources:
+                - "@WebSocketsBundle/Resources/config/channels.yml"
+    pushers:
+        wamp:
+            port: '%websocket_port%'
+            host: '%websocket_host%'
+    client:
+        firewall: main
+        session_handler: session.handler.native_file
+framework:
+    secret:          "%secret%"
+    router:
+        resource: "%kernel.root_dir%/config/routing.yml"
+        strict_requirements: ~
+    form:            ~
+    csrf_protection: ~
+    validation:      { enable_annotations: true }
+    serializer:
+        enabled: true
+    templating:
+        engines: ['twig']
+    default_locale:  "%locale%"
+    session:
+        handler_id:  session.handler.native_file
+        save_path:   "%kernel.root_dir%/../var/sessions/%kernel.environment%"
+    fragments:       ~
+    http_method_override: true
+    assets: ~
+
+# Twig Configuration
+twig:
+    debug:            "%kernel.debug%"
+    strict_variables: "%kernel.debug%"
+
+# Doctrine Configuration
+doctrine:
+    dbal:
+        mapping_types: 
+            enum:       string 
+        driver:   pdo_mysql
+        host:     "%database_host%"
+        port:     "%database_port%"
+        dbname:   "%database_name%"
+        user:     "%database_user%"
+        password: "%database_password%"
+        charset:  UTF8
+        # if using pdo_sqlite as your database driver:
+        #   1. add the path in parameters.yml
+        #     e.g. database_path: "%kernel.root_dir%/data/data.db3"
+        #   2. Uncomment database_path in parameters.yml.dist
+        #   3. Uncomment next line:
+        #     path:     "%database_path%"
+
+    orm:
+        auto_generate_proxy_classes: false
+        naming_strategy: doctrine.orm.naming_strategy.underscore
+        auto_mapping: true
+        mappings:
+            translatable:
+                type: annotation
+                alias: Gedmo
+                prefix: Gedmo\Translatable\Entity
+                dir: "%kernel.root_dir%/../vendor/gedmo/doctrine-extensions/lib/Gedmo/Translatable/Entity/MappedSuperclass"
+
+# Swiftmailer Configuration
+swiftmailer:
+    transport: "%mailer_transport%"
+    host:      "%mailer_host%"
+    username:  "%mailer_user%"
+    password:  "%mailer_password%"
+    encryption:  "%mailer_encryption%"
+    spool:     { type: memory }

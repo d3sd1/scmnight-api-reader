@@ -1,0 +1,12 @@
+app_tokens:
+    type:     rest
+    resource: AppBundle\Controller\MacTokenController
+app_version:
+    type:     rest
+    resource: AppBundle\Controller\VersionController
+app_clients:
+    type:     rest
+    resource: AppBundle\Controller\ClientsController
+app_users:
+    type:     rest
+    resource: AppBundle\Controller\UsersController

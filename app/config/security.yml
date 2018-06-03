@@ -1,0 +1,31 @@
+security:
+    providers:
+        auth_token_user_provider:
+            id: auth_token_user_provider
+        app_token_provider:
+            id: app_token_provider
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        rest:
+            pattern: ^/(?!rest/auth-login|rest/recover|rest/recover/code|app)
+            stateless: true
+            simple_preauth:
+                authenticator: auth_token_authenticator
+            provider: auth_token_user_provider
+            anonymous: ~
+        app:
+            pattern: ^/(?!rest|app/mac-token)
+            stateless: true
+            simple_preauth:
+                authenticator: app_token_authenticator
+            provider: app_token_provider
+            anonymous: ~
+
+    encoders:
+        DataBundle\Entity\User:
+            algorithm: bcrypt
+            cost: 12

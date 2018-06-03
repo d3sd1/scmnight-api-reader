@@ -1,0 +1,16 @@
+email:
+    resource: "@EmailBundle/Controller/"
+    type:     annotation
+    prefix:   /
+
+default:
+    resource: "@HandlingBundle/Resources/config/routing.yml"
+    prefix:   /
+app:
+    resource: "@AppBundle/Resources/config/routing.yml"
+    prefix:   /app/
+    defaults: {_format: json} 
+rest:
+    resource: "@RestBundle/Resources/config/routing.yml"
+    prefix:   /rest/
+    defaults: {_format: json} 

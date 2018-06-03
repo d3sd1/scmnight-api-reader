@@ -1,0 +1,73 @@
+{
+    "name": "root/application",
+    "license": "proprietary",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "": "src/"
+        },
+        "classmap": [
+            "app/AppKernel.php",
+            "app/AppCache.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "php": ">7.2",
+        "symfony/symfony": "^4.0.7",
+        "doctrine/orm": "^2.6.0",
+        "doctrine/doctrine-bundle": "^1.8.1",
+        "doctrine/doctrine-cache-bundle": "^1.3.2",
+        "symfony/swiftmailer-bundle": "^3.2.2",
+        "symfony/monolog-bundle": "^3.1.2",
+        "sensio/framework-extra-bundle": "^5.1.6",
+        "friendsofsymfony/rest-bundle": "^2.3.1",
+        "nelmio/cors-bundle": "^1.5.4",
+        "symfony/http-kernel": "^4.0.7",
+        "lexik/jwt-authentication-bundle": "^2.4.4",
+        "gedmo/doctrine-extensions": "^2.4.33",
+        "gos/web-socket-bundle": "^1.8.12",
+        "jms/serializer": "^1.11",
+        "doctrine/doctrine-fixtures-bundle": "^3.0.2",
+        "doctrine/doctrine-migrations-bundle": "^v1.3.1",
+        "jms/serializer-bundle": "^2.3"
+    },
+    "require-dev": {
+        "symfony/phpunit-bridge": "^4.0.3",
+        "neronmoon/scriptsdev": "^0.1.2"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "php bin/console cache:clear --no-debug",
+            "php bin/console doctrine:schema:update --force",
+            "php bin/console doctrine:migrations:migrate --no-interaction"
+        ],
+        "post-update-cmd": [
+            "php bin/console cache:clear --no-debug",
+            "php bin/console doctrine:schema:update --force --no-interaction",
+            "php bin/console doctrine:migrations:migrate --no-interaction"
+        ]
+    },
+    "extra": {
+        "symfony-app-dir": "app",
+        "symfony-bin-dir": "bin",
+        "symfony-var-dir": "var",
+        "symfony-web-dir": "web",
+        "symfony-tests-dir": "tests",
+        "symfony-assets-install": "relative",
+        "branch-alias": null,
+        "scripts-dev": {
+            "pre-install-cmd": [
+                "php bin/console doctrine:database:drop --force --if-exists --no-interaction",
+                "php bin/console doctrine:database:create --if-not-exists --no-interaction"
+            ],
+            "post-install-cmd": [
+                "php bin/console doctrine:fixtures:load --append"
+            ]
+        }
+    }
+}

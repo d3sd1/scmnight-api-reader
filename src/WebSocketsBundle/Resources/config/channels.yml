@@ -1,0 +1,20 @@
+api_clients:
+    channel: scm/clients
+    handler:
+        callback: 'clients.topic'
+api_users:
+    channel: scm/users
+    handler:
+        callback: 'users.topic'
+api_users_manage:
+    channel: scm/users_manage
+    handler:
+        callback: 'manage.users.topic'
+api_config_manage:
+    channel: scm/config_manage
+    handler:
+        callback: 'manage.config.topic'
+auth_guard:
+    channel: scm/auth
+    handler:
+        callback: 'auth.topic'

@@ -1,0 +1,42 @@
+imports:
+    - { resource: services.yml }
+# Nelmio CORS
+nelmio_cors:
+    defaults:
+        allow_origin:  ["*"]
+        allow_methods: ["POST", "PUT", "GET", "DELETE", "OPTIONS"]
+        allow_headers: ["content-type", "authorization"]
+        max_age:       3600
+    paths:
+        '^/rest':
+            allow_origin: ['*']
+
+
+# FOS REST Bundle
+fos_rest:
+    routing_loader:
+        default_format: json
+        include_format: true
+    exception:
+        enabled: true
+        messages:
+            'Symfony\Component\HttpKernel\Exception\HttpException' : true
+            'Symfony\Component\Security\Core\Exception\BadCredentialsException': true
+        codes:
+            'Symfony\Component\Security\Core\Exception\BadCredentialsException': 401
+    view:
+        view_response_listener: true
+        mime_types:
+            json: ['application/json; charset=UTF-8', 'application/json']
+    format_listener:
+        rules:
+            - { path: '^/rest', priorities: [ json ], fallback_format: json, prefer_extension: true }
+            - { path: '^/app', priorities: ['json'], fallback_format: 'json' }
+            - { path: '^/', priorities: [ 'text/html'], prefer_extension: false }
+    body_listener:
+        enabled: true
+# Lexik JWT auth
+lexik_jwt_authentication:
+    private_key_path: '%jwt_private_key_path%'
+    public_key_path:  '%jwt_public_key_path%'
+    pass_phrase:      '%jwt_key_pass_phrase%'

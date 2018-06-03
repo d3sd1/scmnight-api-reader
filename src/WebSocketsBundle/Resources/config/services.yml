@@ -1,0 +1,20 @@
+services:
+    sockets.clients:
+        class: WebSocketsBundle\Topic\ClientsTopic
+    sockets.auth:
+        class: WebSocketsBundle\Topic\AuthTopic
+    sockets.users:
+        class: WebSocketsBundle\Topic\UsersTopic
+    sockets.users.manage:
+        class: WebSocketsBundle\Topic\ManageUsersTopic
+    sockets.config.manage:
+        class: WebSocketsBundle\Topic\ManageConfigTopic
+        
+    gos_web_socket_server.client_event.listener:
+        class: WebSocketsBundle\EventListener\ConnectionListener
+        tags:
+            - { name: kernel.event_listener, event: 'gos_web_socket.client_connected', method: onClientConnect }
+            - { name: kernel.event_listener, event: 'gos_web_socket.client_disconnected', method: onClientDisconnect }
+            - { name: kernel.event_listener, event: 'gos_web_socket.client_error', method: onClientError }
+            - { name: kernel.event_listener, event: 'gos_web_socket.server_launched', method: onServerStart }
+            - { name: kernel.event_listener, event: 'gos_web_socket.client_rejected', method: onClientRejected }

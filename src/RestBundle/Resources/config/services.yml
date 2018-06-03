@@ -1,0 +1,42 @@
+services:
+    auth_token_user_provider:
+        class: RestBundle\Security\AuthTokenUserProvider
+        arguments: ["@auth_token_repository", "@user_repository"]
+        public:    false
+
+    auth_token_repository:
+        class:   Doctrine\ORM\EntityManager
+        factory: ["@doctrine.orm.entity_manager", "getRepository"]
+        arguments: ["RestBundle:AuthToken"]
+        public: true
+
+    user_repository:
+        class:   Doctrine\ORM\EntityManager
+        factory: ["@doctrine.orm.entity_manager", "getRepository"]
+        arguments: ["DataBundle:User"]
+        public: true
+
+    auth_token_authenticator:
+        class:     RestBundle\Security\AuthTokenAuthenticator
+        arguments: ["@service_container", "@security.http_utils", "@doctrine.orm.entity_manager"]
+        public:    false
+    Tables:
+        class: RestBundle\Utils\Tables
+        arguments: [ "@doctrine.orm.entity_manager" ]
+        public: true
+    encoder:
+        class: DataBundle\Service\UserManager
+        arguments: ['@security.encoder_factory']
+        public: true
+    permissions:
+        class: RestBundle\Utils\Permissions
+        arguments: [ "@doctrine.orm.entity_manager" ]
+        public: true
+    response:
+        class: RestBundle\Utils\RestResponse
+        arguments: [ "@service_container" ]
+        public: true
+    mail:
+        class: RestBundle\Utils\Mailing
+        arguments: [ "@service_container" ]
+        public: true
