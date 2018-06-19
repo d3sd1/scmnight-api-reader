@@ -41,11 +41,19 @@
         "neronmoon/scriptsdev": "^0.1.2"
     },
     "scripts": {
-        "post-install-cmd": [
-            "composer update"
-        ],
-        "post-update-cmd": [
+        "dev-install": [
+            "composer update",
             "php bin/console cache:clear --no-debug",
+            "php bin/console doctrine:database:create --if-not-exists --no-interaction",
+            "php bin/console doctrine:schema:update --force --no-interaction",
+            "php bin/console doctrine:migrations:migrate --no-interaction",
+            "openssl genrsa -out var/jwt/private.pem -aes256 -passout pass:g6GfdDs2453Ax 4096 && openssl rsa -pubout -in var/jwt/private.pem -out var/jwt/public.pem  -passin pass:g6GfdDs2453Ax",
+            "php bin/console doctrine:fixtures:load --append"
+        ],
+        "prod-install": [
+            "composer update",
+            "php bin/console cache:clear --no-debug",
+            "php bin/console doctrine:database:create --if-not-exists --no-interaction",
             "php bin/console doctrine:schema:update --force --no-interaction",
             "php bin/console doctrine:migrations:migrate --no-interaction",
             "openssl genrsa -out var/jwt/private.pem -aes256 -passout pass:g6GfdDs2453Ax 4096 && openssl rsa -pubout -in var/jwt/private.pem -out var/jwt/public.pem  -passin pass:g6GfdDs2453Ax"
@@ -58,15 +66,6 @@
         "symfony-web-dir": "web",
         "symfony-tests-dir": "tests",
         "symfony-assets-install": "relative",
-        "branch-alias": null,
-        "scripts-dev": {
-            "pre-install-cmd": [
-                "php bin/console doctrine:database:drop --force --if-exists --no-interaction",
-                "php bin/console doctrine:database:create --if-not-exists --no-interaction"
-            ],
-            "post-install-cmd": [
-                "php bin/console doctrine:fixtures:load --append"
-            ]
-        }
+        "branch-alias": null
     }
 }

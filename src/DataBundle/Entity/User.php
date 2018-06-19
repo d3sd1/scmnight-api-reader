@@ -79,12 +79,19 @@ class User implements UserInterface
      * @Exclude
      */
     private $plainPassword;
-    
+
     /**
      * @var string
      * @ORM\Column(name="langcode", type="string", length=4, nullable=true)
      */
     private $langCode;
+
+    //TODO: continuar permisos aqui
+    /**
+     * @ORM\ManyToOne(targetEntity="\DataBundle\Entity\"))
+     * @ORM\JoinColumn(onDelete="SET NULL")
+     */
+    private $permissions;
     
     /**
      * Get id

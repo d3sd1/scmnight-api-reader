@@ -18,7 +18,7 @@ class SessionController extends Controller {
             $data = $this->container->get('jms_serializer')->deserialize($request->getContent(), "RestBundle\Entity\LoginData", "json");
         }
         catch (\JMS\Serializer\Exception\RuntimeException $e) {
-            return $this->get('response')->error(500, "NO_LOGIN_PROVIDED");
+            return $this->get('response')->error(400, "NO_LOGIN_PROVIDED");
         }
         $em = $this->get('doctrine.orm.entity_manager');
         $user = $em->getRepository('DataBundle:User')->findOneByDni($data->getUser()->getDni());
@@ -93,14 +93,13 @@ class SessionController extends Controller {
         $loginLog = new UserLogin();
         $loginLog->setUser($user);
         $coords = $request->request->get("coords");
-        if (null !== $coords) {
+        if (null !== $coords && null != $coords["lat"] && null != $coords["lng"]) {
             $loginLog->setLat($coords["lat"]);
             $loginLog->setLng($coords["lng"]);
         }
         $em->persist($loginLog);
         $em->flush();
-
-        return $this->get('response')->success("", $authToken);
+        return $this->get('response')->success("LOGIN_SUCCESS", $authToken);
     }
 
     /**

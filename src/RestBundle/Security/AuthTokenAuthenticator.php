@@ -28,8 +28,9 @@ class AuthTokenAuthenticator implements SimplePreAuthenticatorInterface, Authent
         $authorization = $request->headers->get('Authorization');
 
         $auth_explode = explode(' ', $authorization);
+        $authTokenHeader = "";
         if (strtolower($auth_explode[0]) != "bearer") {
-            $this->get('response')->error(401, "AUTH_HEADER_REQUIRED");
+            $this->container->get('response')->error(401, "AUTH_HEADER_REQUIRED");
         }
         else {
             $authTokenHeader = $auth_explode[1];
@@ -59,33 +60,36 @@ class AuthTokenAuthenticator implements SimplePreAuthenticatorInterface, Authent
             $pagePermissions = $this->em->getRepository('DataBundle:PagePermissions')->findBy(array('pageUrl' => $pageUrl));
             $userPermissions = $this->em->getRepository('DataBundle:UserPermissions')->findBy(array('user' => $user));
             if (count($userPermissions) === 0) {
-                $this->get('response')->error(500, "USER_PERMISSIONS_NOT_CONFIGURED");
+                $this->container->get('response')->error(500, "USER_PERMISSIONS_NOT_CONFIGURED");
             }
             else if (count($pagePermissions) === 0) {
-                $this->get('response')->error(500, "REST_PERMISSIONS_NOT_CONFIGURED");
+                $this->container->get('response')->error(500, "REST_PERMISSIONS_NOT_CONFIGURED");
+            }
+            foreach ($pagePermissions as $pagePermission) {
+                $hasPermission = false;
+                foreach ($userPermissions as $userPermission) {
+                    if ($userPermission->getPermission()->getId() === $pagePermission->getPermission()->getId()) {
+                        $hasPermission = true;
+                    }
+                }
+                if (!$hasPermission) {
+                    $this->container->get('response')->error(403, "USER_HAS_NO_PERMISSIONS");
+                }
             }
         }
         catch (\Doctrine\ORM\NoResultException $e) {
-            $this->get('response')->error(500, "REST_PERMISSIONS_NOT_CONFIGURED");
+            $this->container->get('response')->error(500, "REST_PERMISSIONS_NOT_CONFIGURED");
         }
-        catch (Exception $e) {
-            $this->get('response')->error(500, "REST_PERMISSIONS_CHECK");
-        }
-
-        foreach ($pagePermissions as $pagePermission) {
-            $hasPermission = false;
-            foreach ($userPermissions as $userPermission) {
-                if ($userPermission->getPermission()->getId() === $pagePermission->getPermission()->getId()) {
-                    $hasPermission = true;
-                }
-            }
-            if (!$hasPermission) {
-                $this->get('response')->error(403, "USER_HAS_NO_PERMISSIONS");
-            }
+        catch (\Exception $e) {
+            $this->container->get('response')->error(500, "REST_PERMISSIONS_CHECK");
         }
     }
 
     private function validateToken($authToken) {
+        if($authToken === null || $authToken == "")
+        {
+            return new User();
+        }
         try {
             $lastAuthToken = $this->em->getRepository('RestBundle:AuthToken')
                     ->createQueryBuilder("at")
@@ -98,12 +102,12 @@ class AuthTokenAuthenticator implements SimplePreAuthenticatorInterface, Authent
                     ->getSingleResult();
 
             if ($lastAuthToken["token"] != $authToken->getValue()) {
-                $this->get('response')->error(406, "CONNECTED_OTHER_PC");
+                $this->container->get('response')->error(406, "CONNECTED_OTHER_PC");
             }
             return $authToken->getUser();
         }
-        catch (Exception $e) {
-            $this->get('response')->error(500, "REST_AUTH_VALIDATE");
+        catch (\Exception $e) {
+            $this->container->get('response')->error(500, "REST_AUTH_VALIDATE");
         }
     }
 
@@ -111,6 +115,10 @@ class AuthTokenAuthenticator implements SimplePreAuthenticatorInterface, Authent
         try {
             $authToken = $userProvider->getAuthToken($token->getCredentials());
 
+            if($authToken === null)
+            {
+                return false;
+            }
             /* Check token expiry */
             if (null !== $authToken && $authToken->getExtendedSession()) {
                 $expireTtl = $this->container->getParameter('web_extended_token_ttl');
@@ -120,15 +128,15 @@ class AuthTokenAuthenticator implements SimplePreAuthenticatorInterface, Authent
             }
             /* Is token expired */
             if (!$authToken) {
-                $this->get('response')->error(401, "INVALID_TOKEN");
+                $this->container->get('response')->error(401, "INVALID_TOKEN");
             }
             if (!((time() - $authToken->getCreatedDate()->getTimestamp()) < $expireTtl)) {
-                $this->get('response')->error(401, "EXPIRED_TOKEN");
+                $this->container->get('response')->error(401, "EXPIRED_TOKEN");
             }
             return $authToken;
         }
-        catch (Exception $e) {
-            $this->get('response')->error(500, "REST_AUTH_DIGEST");
+        catch (\Exception $e) {
+            $this->container->get('response')->error(500, "REST_AUTH_DIGEST");
         }
     }
 
