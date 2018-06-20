@@ -1,13 +1,15 @@
 <?php
 namespace DataBundle\Repository;
 
+use DataBundle\Entity\ClientEntrance;
+use DataBundle\Entity\ClientEntranceType;
 use Doctrine\ORM\EntityRepository;
 
 class ClientEntranceRepository extends EntityRepository
 {
     public function getEntranceType($dni)
     {
-        $usr = $this->createQueryBuilder('pe')
+        $entrance = $this->createQueryBuilder('pe')
             ->where('pe.client=:dni')
             ->setParameter('dni', $dni)
             ->orderBy('pe.date', 'DESC')
@@ -15,9 +17,10 @@ class ClientEntranceRepository extends EntityRepository
             ->setMaxResults(1)
             ->getOneOrNullResult();
         $entranceType = "JOIN";
-        if($usr != null)
+        if($entrance != null)
         {
-            switch($usr->getType())
+            $entranceNamedType = $this->getEntityManager()->getRepository('DataBundle:ClientEntranceType')->findOneBy(["id" => $entrance->getType()->getId()])->getName();
+            switch($entranceNamedType)
             {
                 case 'JOIN':
                     $entranceType = "LEAVE";
@@ -36,6 +39,11 @@ class ClientEntranceRepository extends EntityRepository
                 break;
             }
         }
-        return $entranceType;
+        else
+        {
+            $entrance = new ClientEntrance();
+        }
+        $entrance->setType($this->getEntityManager()->getRepository('DataBundle:ClientEntranceType')->findOneBy(["name" => $entranceType]));
+        return $entrance;
     }
 }

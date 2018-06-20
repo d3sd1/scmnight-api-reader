@@ -2,6 +2,8 @@
 
 namespace AppBundle\Controller;
 
+use DataBundle\Entity\ClientEntranceType;
+use JMS\Serializer\SerializationContext;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Symfony\Component\HttpFoundation\Response;
@@ -62,75 +64,89 @@ class ClientsController extends Controller
         $person->setNationality($personData["nationality"]);
         $person->setBiometric($personData["biometric"]);
         $em->persist($person);
-        $em->flush();
 
         /* Manejar entrada */
         $type = $em->getRepository('DataBundle:ClientEntrance')->getEntranceType($person->getDni());
         $conflictive = $em->getRepository('DataBundle:Client')->isConflictive($person->getDni());
         $room_actual = $em->getRepository('DataBundle:ClientRoom')->createQueryBuilder('pa')->select('count(pa.client)')->getQuery()->getSingleScalarResult();
         $room_max = $em->getRepository('DataBundle:Config')->loadConfig("maxPersonsInRoom");
-
         $entrance = new ClientEntrance();
         $entrance->setClient($person);
         $entrance->setVip($isVipAccess);
-
         if ($forceAccess)
         {
-            if ($type == "JOIN")
+            if ($type->getType()->getName() == "JOIN")
             {
-                $entrance->setType("FORCED_ACCESS");
+                $entrance->setType($em->getRepository('DataBundle:ClientEntranceType')->findOneBy(["name" => "FORCED_ACCESS"]));
                 $em->getRepository('DataBundle:ClientRoom')->add($entrance);
             }
             else
             {
-                $entrance->setType("LEAVE");
+                $entrance->setType($em->getRepository('DataBundle:ClientEntranceType')->findOneBy(["name" => "LEAVE"]));
                 $em->getRepository('DataBundle:ClientRoom')->rm($entrance);
             }
         }
         else
         {
-            switch ($type)
+            switch ($type->getType()->getName())
             {
                 case "JOIN":
                     if ($conflictive)
                     {
-                        $entrance->setType("DENIED_CONFLICTIVE");
+                        $entrance->setType($em->getRepository('DataBundle:ClientEntranceType')->findOneBy(["name" => "DENIED_CONFLICTIVE"]));
                         $this->apiErrorMsg = "User is conflictive.";
-                        $success = false;
                     }
                     else if ($room_actual >= $room_max)
                     {
-                        $entrance->setType("DENIED_FULL");
+                        $entrance->setType($em->getRepository('DataBundle:ClientEntranceType')->findOneBy(["name" => "DENIED_FULL"]));
                         $this->apiErrorMsg = "Room is full.";
-                        $success = false;
                     }
                     else
                     {
-                        $entrance->setType($type);
+                        $entrance->setType($em->getRepository('DataBundle:ClientEntranceType')->findOneBy(["name" => $type->getType()->getName()]));
                         $em->getRepository('DataBundle:ClientRoom')->add($entrance);
                     }
                     break;
                 default:
-                        $entrance->setType($type);
-                        $em->getRepository('DataBundle:ClientRoom')->rm($entrance);
+                    $entrance->setType($em->getRepository('DataBundle:ClientEntranceType')->findOneBy(["name" => $type->getType()->getName()]));
+                    $em->getRepository('DataBundle:ClientRoom')->rm($entrance);
                     break;
             }
         }
-
+        $em->persist($entrance);
+        $em->flush();
+        $serializedEntrance = $this->container->get('jms_serializer')->serialize($entrance, "json");
         try
         {
             $pusher = $this->container->get('websockets.pusher');
-            $pusher->push($this->container->get('jms_serializer')->serialize($entrance, "json"), 'api_clients');
+            $pusher->push($serializedEntrance, 'api_clients');
         }
         catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e)
         {
             $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
         }
-        $em->persist($entrance);
-        $em->flush();
 
         $response = new JsonResponse();
-        $response->setContent($this->container->get('jms_serializer')->serialize($entrance, "json"));
+        $response->setContent($serializedEntrance);
+        return $response;
+    }
+
+    /**
+     * @Rest\View()
+     * @Rest\Get("/client/pricing")
+     */
+    public function clientEntrancePricingAction(Request $request)
+    {
+        $em = $this->get('doctrine.orm.entity_manager');
+        /* Añadir persona a la base de datos */
+        $pricings = $em->getRepository('DataBundle:ClientEntrancePricing')->findAll();
+
+        if ($pricings === null)
+        {
+            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException("No pricings found");
+        }
+        $response = new JsonResponse();
+        $response->setContent($this->container->get('jms_serializer')->serialize($pricings, "json"));
         return $response;
     }
 

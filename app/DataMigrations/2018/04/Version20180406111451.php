@@ -24,11 +24,11 @@ class Version20180406111451 extends AbstractMigration {
         $this->addSql('INSERT INTO config_type (TYPE) VALUES ("double")');
         $this->addSql('INSERT INTO users_entrance_type (TYPE) VALUES ("JOIN")');
         $this->addSql('INSERT INTO users_entrance_type (TYPE) VALUES ("LEAVE")');
-        $this->addSql('INSERT INTO clients_entrance_type (TYPE) VALUES ("JOIN")');
-        $this->addSql('INSERT INTO clients_entrance_type (TYPE) VALUES ("LEAVE")');
-        $this->addSql('INSERT INTO clients_entrance_type (TYPE) VALUES ("DENIED_FULL")');
-        $this->addSql('INSERT INTO clients_entrance_type (TYPE) VALUES ("DENIED_CONFLICTIVE")');
-        $this->addSql('INSERT INTO clients_entrance_type (TYPE) VALUES ("FORCED_ACCESS")');
+        $this->addSql('INSERT INTO clients_entrance_type (name) VALUES ("JOIN")');
+        $this->addSql('INSERT INTO clients_entrance_type (name) VALUES ("LEAVE")');
+        $this->addSql('INSERT INTO clients_entrance_type (name) VALUES ("DENIED_FULL")');
+        $this->addSql('INSERT INTO clients_entrance_type (name) VALUES ("DENIED_CONFLICTIVE")');
+        $this->addSql('INSERT INTO clients_entrance_type (name) VALUES ("FORCED_ACCESS")');
         $this->addSql('INSERT INTO users_manage_type (TYPE) VALUES ("ADD")');
         $this->addSql('INSERT INTO users_manage_type (TYPE) VALUES ("EDIT")');
         $this->addSql('INSERT INTO users_manage_type (TYPE) VALUES ("DELETE")');
@@ -43,6 +43,7 @@ class Version20180406111451 extends AbstractMigration {
         $this->addSql('insert  into `config`(`config`,`value`, dataType) values  ("disco_name","Mi discoteca",2)');
         $this->addSql('insert  into `config`(`config`,`value`, dataType) values  ("recover_code_seconds_expire","600",1)');
         $this->addSql('insert  into `scm_config`(`config`,`value`) values  ("version","0.7.1")');
+        $this->addSql('insert  into `clients_entrance_pricing`(`name`,`price`) values  ("Gratis por RRPP","0"),("Entrada por RRPP","5"),("Entrada general","10"),("Invitado","0")');
     }
 
     public function down(Schema $schema) {

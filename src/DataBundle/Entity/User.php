@@ -87,12 +87,12 @@ class User implements UserInterface
     private $langCode;
 
     //TODO: continuar permisos aqui
-    /**
-     * @ORM\ManyToOne(targetEntity="\DataBundle\Entity\"))
+    /*
+     * @ORM\ManyToOne(targetEntity="\DataBundle\Entity\Permissions"))
      * @ORM\JoinColumn(onDelete="SET NULL")
-     */
+
     private $permissions;
-    
+    */
     /**
      * Get id
      *

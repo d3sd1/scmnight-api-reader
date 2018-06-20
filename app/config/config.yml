@@ -14,6 +14,9 @@ services:
     DataFixtures\:
         resource: '../../src/DataFixtures'
         tags: ['doctrine.fixture.orm']
+    app.logger:
+        alias: logger
+        public: true
 doctrine_migrations:
     dir_name: "%kernel.root_dir%/DataMigrations"
     namespace: Application\DataMigrations
@@ -27,7 +30,15 @@ jms_serializer:
         datetime:
             default_format: "Y-m-d\\TH:i:sP" # ATOM
             default_timezone: "UTC" # defaults to whatever timezone set in php.ini or via date_default_timezone_set
-    
+    default_context:
+        serialization:
+            serialize_null: true
+fos_rest:
+    routing_loader:
+      default_format: json
+    param_fetcher_listener: force
+    serializer:
+      serialize_null: true
 parameters:
     locale: en
     jwt_private_key_path: '%kernel.root_dir%/../var/jwt/private.pem'

@@ -23,7 +23,6 @@ class Encoding
     
     function parseDniCertificate($data)
     {
-        print_r($data);die();
         $dniInfo = array();
         $z = explode(',', preg_replace("/ \([^)]+\)/", "", $data['subject']['CN']));
         $surnames = explode(" ", $z[0]);

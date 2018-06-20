@@ -9,24 +9,32 @@ use JMS\Serializer\Annotation\Type;
 
 /**
  * @Serializer\ExclusionPolicy("all")
- * @ORM\Table(name="clients_entrance_type")
+ * @ORM\Table(name="clients_entrance_pricing")
  * @ORM\Entity(repositoryClass="DataBundle\Repository\ClientEntranceRepository")
  */
-class ClientEntranceType
+class ClientEntrancePricing
 {
 
     /**
+     * @Serializer\Expose()
      * @ORM\Column(type="bigint")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
-    
+
     /**
      * @Serializer\Expose()
      * @ORM\Column(type="string", unique=true)
      */
     private $name;
+
+    /**
+     * Precio en euros con céntimos.
+     * @Serializer\Expose()
+     * @ORM\Column(type="float")
+     */
+    private $price;
 
     function getId() {
         return $this->id;
@@ -42,6 +50,22 @@ class ClientEntranceType
 
     function setName($name) {
         $this->name = $name;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPrice()
+    {
+        return $this->price;
+    }
+
+    /**
+     * @param mixed $price
+     */
+    public function setPrice($price): void
+    {
+        $this->price = $price;
     }
 
 }
