@@ -25,8 +25,8 @@ class ConfigManage {
     private $user;
 
     /**
-     * @ORM\ManyToOne(targetEntity="\DataBundle\Entity\ConfigType"))
-     * @ORM\JoinColumn(name="id", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity="\DataBundle\Entity\Config"))
+     * @ORM\JoinColumn(name="targetConfig", referencedColumnName="id")
      */
     private $targetConfig;
 

@@ -55,6 +55,9 @@ gos_web_socket:
         - "@sockets.users"
         - "@sockets.users.manage"
         - "@sockets.config.manage"
+        - "@sockets.users.entrances"
+        - "@sockets.clients.entrances"
+        - "@sockets.clients.bans"
     shared_config: false
     server:
         port: '%websocket_port%'

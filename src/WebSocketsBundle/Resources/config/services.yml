@@ -5,6 +5,12 @@ services:
         class: WebSocketsBundle\Topic\AuthTopic
     sockets.users:
         class: WebSocketsBundle\Topic\UsersTopic
+    sockets.users.entrances:
+        class: WebSocketsBundle\Topic\UsersEntranceTopic
+    sockets.clients.entrances:
+        class: WebSocketsBundle\Topic\ClientsEntranceTopic
+    sockets.clients.bans:
+        class: WebSocketsBundle\Topic\ClientsBansTopic
     sockets.users.manage:
         class: WebSocketsBundle\Topic\ManageUsersTopic
     sockets.config.manage:

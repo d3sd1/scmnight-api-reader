@@ -4,6 +4,7 @@ namespace DataBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
+use JMS\Serializer\Annotation\Type;
 
 /**
  * @ORM\Table(name="users_entrances")
@@ -27,7 +28,7 @@ class UserEntrance
 
     /**
      * @var datetime $created
-     *
+     * @Type("DateTime")
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime")
      */

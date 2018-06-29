@@ -2,12 +2,25 @@
 
 namespace RestBundle\Controller;
 
+use DataBundle\Entity\ConfigType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use DataBundle\Entity\ConfigManage;
 
 class ConfigController extends Controller {
+
+
+    /**
+     * @Rest\Get("/find/{name}")
+     */
+    public function findConfigAction(Request $request)
+    {
+        $config = $this->get('doctrine.orm.entity_manager')
+            ->getRepository('DataBundle:Config')
+            ->findOneBy(["config" => $request->get("name")]);
+        return $this->get('response')->success("", $config);
+    }
 
     /**
      * @Rest\Post("/table/all")
@@ -31,7 +44,8 @@ class ConfigController extends Controller {
         if (null === $confDB) {
             return $this->get('response')->error(400, "NO_CONFIG_FOUND");
         }
-        switch ($confDB->getDataType()) {
+        $dataType = $em->getRepository('DataBundle:ConfigType')->findOneBy(array("id" => $confDB->getDataType()));
+        switch ($dataType->getType()) {
             case "boolean":
                 $newValue = boolval($conf->getValue());
                 break;
@@ -46,7 +60,6 @@ class ConfigController extends Controller {
                 break;
         }
         $confDB->setValue($newValue);
-
         $configLog = new ConfigManage();
         $configLog->setTargetConfig($confDB);
         $configLog->setUser($this->get('security.token_storage')->getToken()->getUser());
@@ -55,12 +68,11 @@ class ConfigController extends Controller {
         try {
             $pusher = $this->container->get('websockets.pusher');
             $pusher->push($this->container->get('jms_serializer')->serialize($configLog, "json"), 'api_config_manage');
-        }
-        catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
+        } catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
             $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
         }
 
-        return $this->get('response')->success("", $confDB);
+        return $this->get('response')->success("CONFIG_UPDATED", $confDB);
     }
 
 }

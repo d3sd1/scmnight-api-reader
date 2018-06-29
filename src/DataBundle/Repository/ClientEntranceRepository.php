@@ -39,10 +39,7 @@ class ClientEntranceRepository extends EntityRepository
                 break;
             }
         }
-        else
-        {
-            $entrance = new ClientEntrance();
-        }
+        $entrance = new ClientEntrance();
         $entrance->setType($this->getEntityManager()->getRepository('DataBundle:ClientEntranceType')->findOneBy(["name" => $entranceType]));
         return $entrance;
     }

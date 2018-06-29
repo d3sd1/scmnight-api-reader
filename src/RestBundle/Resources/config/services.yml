@@ -40,3 +40,6 @@ services:
         class: RestBundle\Utils\Mailing
         arguments: [ "@service_container" ]
         public: true
+    encoder.factory:
+        alias: security.encoder_factory
+        public: true

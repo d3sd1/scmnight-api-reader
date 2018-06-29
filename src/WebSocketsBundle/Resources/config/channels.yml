@@ -6,6 +6,18 @@ api_users:
     channel: scm/users
     handler:
         callback: 'users.topic'
+api_userentrances:
+    channel: scm/users_entrances
+    handler:
+        callback: 'entrance.users.topic'
+api_clientsentrances:
+    channel: scm/clients_entrances
+    handler:
+        callback: 'entrance.clients.topic'
+api_clientsbans:
+    channel: scm/clients_conflictive
+    handler:
+        callback: 'clients.bans.topic'
 api_users_manage:
     channel: scm/users_manage
     handler:

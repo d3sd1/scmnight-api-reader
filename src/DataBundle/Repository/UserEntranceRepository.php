@@ -1,13 +1,14 @@
 <?php
 namespace DataBundle\Repository;
 
+use DataBundle\Entity\UserEntrance;
 use Doctrine\ORM\EntityRepository;
 
 class UserEntranceRepository extends EntityRepository
 {
     public function getEntranceType($user)
     {
-        $usr = $this->createQueryBuilder('pe')
+        $entrance = $this->createQueryBuilder('pe')
             ->where('pe.user=:user')
             ->setParameter('user', $user)
             ->orderBy('pe.date', 'DESC')
@@ -15,18 +16,20 @@ class UserEntranceRepository extends EntityRepository
             ->setMaxResults(1)
             ->getOneOrNullResult();
         $entranceType = "JOIN";
-        if($usr != null)
-        {
-            switch($usr->getType())
-            {
+
+        if ($entrance != null) {
+            $entranceNamedType = $this->getEntityManager()->getRepository('DataBundle:UserEntranceType')->findOneBy(["id" => $entrance->getType()->getId()])->getName();
+            switch ($entranceNamedType) {
                 case 'JOIN':
                     $entranceType = "LEAVE";
-                break;
+                    break;
                 case 'LEAVE':
                     $entranceType = "JOIN";
-                break;
+                    break;
             }
         }
-        return $entranceType;
+        $entrance = new UserEntrance();
+        $entrance->setType($this->getEntityManager()->getRepository('DataBundle:UserEntranceType')->findOneBy(["name" => $entranceType]));
+        return $entrance->getType();
     }
 }

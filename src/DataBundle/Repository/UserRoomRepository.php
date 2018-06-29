@@ -2,6 +2,7 @@
 
 namespace DataBundle\Repository;
 
+use DataBundle\Entity\User;
 use Doctrine\ORM\EntityRepository;
 use DataBundle\Entity\UserEntrance;
 use DataBundle\Entity\UserRoom;
@@ -9,16 +10,11 @@ use DataBundle\Entity\UserRoom;
 class UserRoomRepository extends EntityRepository
 {
 
-    private function transform(UserEntrance $object)
-    {
-        return new UserRoom($object->getUser());
-    }
-
     public function add(UserEntrance $pEntrance)
     {
-        $entrance = $this->transform($pEntrance);
         $em = $this->getEntityManager();
-        $em->persist($entrance);
+        $userInRoom = new UserRoom($pEntrance->getUser());
+        $em->persist($userInRoom);
         $em->flush();
     }
 

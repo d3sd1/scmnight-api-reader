@@ -4,6 +4,7 @@ namespace DataBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * @ORM\Table(name="users_permissions")
@@ -13,6 +14,7 @@ class UserPermissions
 {
 
     /**
+     * @Serializer\Exclude()
      * @ORM\Column(type="bigint")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -20,6 +22,7 @@ class UserPermissions
     private $id;
     
     /**
+     * @Serializer\Exclude()
      * @ORM\ManyToOne(targetEntity="\DataBundle\Entity\User"))
      * @ORM\JoinColumn(onDelete="SET NULL")
      */

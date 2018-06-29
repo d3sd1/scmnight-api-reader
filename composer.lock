@@ -2920,16 +2920,16 @@
         },
         {
             "name": "react/cache",
-            "version": "v0.4.2",
+          "version": "v0.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/cache.git",
-                "reference": "75494f26b4ef089db9bf8c90b63c296246e099e8"
+              "reference": "7d7da7fb7574d471904ba357b39bbf110ccdbf66"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/cache/zipball/75494f26b4ef089db9bf8c90b63c296246e099e8",
-                "reference": "75494f26b4ef089db9bf8c90b63c296246e099e8",
+              "url": "https://api.github.com/repos/reactphp/cache/zipball/7d7da7fb7574d471904ba357b39bbf110ccdbf66",
+              "reference": "7d7da7fb7574d471904ba357b39bbf110ccdbf66",
                 "shasum": ""
             },
             "require": {
@@ -2956,25 +2956,25 @@
                 "promise",
                 "reactphp"
             ],
-            "time": "2017-12-20T16:47:13+00:00"
+          "time": "2018-06-25T12:52:40+00:00"
         },
         {
             "name": "react/dns",
-            "version": "v0.4.13",
+          "version": "v0.4.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/dns.git",
-                "reference": "7d1e08c300fd7de600810883386ee5e2a64898f4"
+              "reference": "75ae3286c03eb022a6fbf909e6148d5022588ba4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/dns/zipball/7d1e08c300fd7de600810883386ee5e2a64898f4",
-                "reference": "7d1e08c300fd7de600810883386ee5e2a64898f4",
+              "url": "https://api.github.com/repos/reactphp/dns/zipball/75ae3286c03eb022a6fbf909e6148d5022588ba4",
+              "reference": "75ae3286c03eb022a6fbf909e6148d5022588ba4",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.0",
-                "react/cache": "~0.4.0|~0.3.0",
+              "react/cache": "^0.5 || ^0.4 || ^0.3",
                 "react/event-loop": "^1.0 || ^0.5 || ^0.4 || ^0.3.5",
                 "react/promise": "^2.1 || ^1.2.1",
                 "react/promise-timer": "^1.2",
@@ -3001,7 +3001,7 @@
                 "dns-resolver",
                 "reactphp"
             ],
-            "time": "2018-02-27T12:51:22+00:00"
+          "time": "2018-06-26T08:20:02+00:00"
         },
         {
             "name": "react/event-loop",
@@ -3822,20 +3822,20 @@
         },
         {
             "name": "symfony/symfony",
-            "version": "v4.1.0",
+          "version": "v4.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/symfony.git",
-                "reference": "58261043876feb695640457c5675bb331a6eb3b7"
+              "reference": "68b56033c43d2c499d8dcf79f374c33049184b96"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/symfony/zipball/58261043876feb695640457c5675bb331a6eb3b7",
-                "reference": "58261043876feb695640457c5675bb331a6eb3b7",
+              "url": "https://api.github.com/repos/symfony/symfony/zipball/68b56033c43d2c499d8dcf79f374c33049184b96",
+              "reference": "68b56033c43d2c499d8dcf79f374c33049184b96",
                 "shasum": ""
             },
             "require": {
-                "doctrine/common": "~2.4",
+              "doctrine/common": "~2.4@stable",
                 "ext-xml": "*",
                 "fig/link-util": "^1.0",
                 "php": "^7.1.3",
@@ -3971,7 +3971,7 @@
             "keywords": [
                 "framework"
             ],
-            "time": "2018-05-30T12:52:50+00:00"
+          "time": "2018-06-25T13:07:10+00:00"
         },
         {
             "name": "twig/twig",
@@ -4292,16 +4292,16 @@
         },
         {
             "name": "symfony/phpunit-bridge",
-            "version": "v4.1.0",
+          "version": "v4.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/phpunit-bridge.git",
-                "reference": "b3451fc442baaf9169e50491a059ef17582c4424"
+              "reference": "c7f28cbf2df4e9deed7fc376ca4f146eaa5afc8a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/phpunit-bridge/zipball/b3451fc442baaf9169e50491a059ef17582c4424",
-                "reference": "b3451fc442baaf9169e50491a059ef17582c4424",
+              "url": "https://api.github.com/repos/symfony/phpunit-bridge/zipball/c7f28cbf2df4e9deed7fc376ca4f146eaa5afc8a",
+              "reference": "c7f28cbf2df4e9deed7fc376ca4f146eaa5afc8a",
                 "shasum": ""
             },
             "require": {
@@ -4354,7 +4354,7 @@
             ],
             "description": "Symfony PHPUnit Bridge",
             "homepage": "https://symfony.com",
-            "time": "2018-05-25T14:55:38+00:00"
+          "time": "2018-06-11T12:56:28+00:00"
         }
     ],
     "aliases": [],

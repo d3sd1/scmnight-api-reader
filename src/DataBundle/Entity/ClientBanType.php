@@ -9,39 +9,43 @@ use JMS\Serializer\Annotation\Type;
 
 /**
  * @Serializer\ExclusionPolicy("all")
- * @ORM\Table(name="clients_entrance_type")
- * @ORM\Entity(repositoryClass="DataBundle\Repository\ClientEntranceRepository")
+ * @ORM\Table(name="clients_ban_type")
+ * @ORM\Entity()
  */
-class ClientEntranceType
+class ClientBanType
 {
 
     /**
-     * @Serializer\Expose()
      * @ORM\Column(type="bigint")
      * @ORM\Id
+     * @Serializer\Expose()
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
-    
+
     /**
      * @Serializer\Expose()
      * @ORM\Column(type="string", unique=true)
      */
     private $name;
 
-    function getId() {
+    function getId()
+    {
         return $this->id;
     }
 
-    function getName() {
+    function getName()
+    {
         return $this->name;
     }
 
-    function setId($id) {
+    function setId($id)
+    {
         $this->id = $id;
     }
 
-    function setName($name) {
+    function setName($name)
+    {
         $this->name = $name;
     }
 

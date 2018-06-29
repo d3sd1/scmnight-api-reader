@@ -40,10 +40,21 @@ class ClientEntrance
     private $vip;
 
     /**
+     * @ORM\Column(type="boolean")
+     */
+    private $forceaccess;
+
+    /**
      * @ORM\ManyToOne(targetEntity="\DataBundle\Entity\ClientEntranceType"))
      * @ORM\JoinColumn(name="type", referencedColumnName="id")
      */
     private $type;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="\DataBundle\Entity\ClientEntrancePricing"))
+     * @ORM\JoinColumn(name="rate", referencedColumnName="id")
+     */
+    private $rate;
     
     
     public function __construct()
@@ -100,5 +111,38 @@ class ClientEntrance
     {
         $this->type = $type;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getRate()
+    {
+        return $this->rate;
+    }
+
+    /**
+     * @param mixed $rate
+     */
+    public function setRate($rate): void
+    {
+        $this->rate = $rate;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getForceaccess()
+    {
+        return $this->forceaccess;
+    }
+
+    /**
+     * @param mixed $forceaccess
+     */
+    public function setForceaccess($forceaccess): void
+    {
+        $this->forceaccess = $forceaccess;
+    }
+
 
 }

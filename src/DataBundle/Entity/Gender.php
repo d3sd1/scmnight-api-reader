@@ -4,13 +4,12 @@ namespace DataBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
-use JMS\Serializer\Annotation\Type;
 
 /**
- * @ORM\Table(name="users_manage_type")
- * @ORM\Entity(repositoryClass="DataBundle\Repository\UserManageRepository")
+ * @ORM\Table(name="genders")
+ * @ORM\Entity()
  */
-class UserManageType
+class Gender
 {
 
     /**
@@ -19,9 +18,11 @@ class UserManageType
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
-    
+
     /**
-     * @ORM\Column(type="string", unique=true)
+     * @var string
+     *
+     * @ORM\Column(name="name", type="string", length=100, unique=true)
      */
     private $name;
 
@@ -42,17 +43,17 @@ class UserManageType
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
     /**
-     * @param mixed $name
+     * @param string $name
      */
-    public function setName($name): void
+    public function setName(string $name): void
     {
         $this->name = $name;
     }

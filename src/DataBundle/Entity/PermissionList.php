@@ -3,27 +3,27 @@
 namespace DataBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Gedmo\Mapping\Annotation as Gedmo;
-use JMS\Serializer\Annotation\Type;
+use JMS\Serializer\Annotation\Exclude;
 
 /**
- * @ORM\Table(name="users_manage_type")
- * @ORM\Entity(repositoryClass="DataBundle\Repository\UserManageRepository")
+ * @ORM\Table(name="permissions_list")
+ * @ORM\Entity()
  */
-class UserManageType
+class PermissionList
 {
 
+
     /**
-     * @ORM\Column(type="bigint")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer")
      */
     private $id;
-    
+
     /**
-     * @ORM\Column(type="string", unique=true)
+     * @ORM\Column(type="string")
      */
-    private $name;
+    private $listKeyName;
 
     /**
      * @return mixed
@@ -44,16 +44,18 @@ class UserManageType
     /**
      * @return mixed
      */
-    public function getName()
+    public function getListKeyName()
     {
-        return $this->name;
+        return $this->listKeyName;
     }
 
     /**
-     * @param mixed $name
+     * @param mixed $listKeyName
      */
-    public function setName($name): void
+    public function setListKeyName($listKeyName): void
     {
-        $this->name = $name;
+        $this->listKeyName = $listKeyName;
     }
+
+
 }

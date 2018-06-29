@@ -31,7 +31,7 @@ class Encoding
         $dniInfo["name"] = substr($z[1], 1);
         $dniInfo["serialNumber"] = $data["serialNumber"];
         $dniInfo["nationality"] = $data['subject']['C'];
-        $dniInfo["nif"] = $data['subject']['serialNumber'];
+        $dniInfo["dni"] = $data['subject']['serialNumber'];
         $dniInfo["biometric"] = $this->base64EncodeUrl($data['extensions']['biometricInfo']);
         $birthdate = substr($data['extensions']['subjectDirectoryAttributes'], -15, 8);
         $yyyy = substr($birthdate, 0, 4);

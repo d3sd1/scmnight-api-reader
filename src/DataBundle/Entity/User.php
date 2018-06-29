@@ -2,9 +2,11 @@
 
 namespace DataBundle\Entity;
 
+use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\Exclude;
+use JMS\Serializer\Annotation\Expose;
 
 /**
  * User
@@ -52,21 +54,21 @@ class User implements UserInterface
      * @ORM\Column(name="lastname", type="string", length=100, nullable=true)
      */
     private $lastname;
-    
+
     /**
      * @var string
      *
      * @ORM\Column(name="dni", type="string", length=25, nullable=false, unique=true)
      */
     private $dni;
-    
+
     /**
      * @var string
      *
      * @ORM\Column(name="address", type="string", length=100, nullable=false)
      */
     private $address;
-    
+
     /**
      * @var string
      *
@@ -82,17 +84,17 @@ class User implements UserInterface
 
     /**
      * @var string
+     * @Serializer\Type("string")
+     * @Exclude(if="context.getDirection() === 1")
+     */
+    private $newpass;
+
+    /**
+     * @var string
      * @ORM\Column(name="langcode", type="string", length=4, nullable=true)
      */
     private $langCode;
 
-    //TODO: continuar permisos aqui
-    /*
-     * @ORM\ManyToOne(targetEntity="\DataBundle\Entity\Permissions"))
-     * @ORM\JoinColumn(onDelete="SET NULL")
-
-    private $permissions;
-    */
     /**
      * Get id
      *
@@ -102,6 +104,7 @@ class User implements UserInterface
     {
         return $this->id;
     }
+
     public function setId($id)
     {
         $this->id = $id;
@@ -303,6 +306,22 @@ class User implements UserInterface
     function setLangCode($langCode)
     {
         $this->langCode = $langCode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getNewpass()
+    {
+        return $this->newpass;
+    }
+
+    /**
+     * @param string $newpass
+     */
+    public function setNewpass(string $newpass): void
+    {
+        $this->newpass = $newpass;
     }
 
 }

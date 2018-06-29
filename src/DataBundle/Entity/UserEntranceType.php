@@ -23,22 +23,24 @@ class UserEntranceType
     /**
      * @ORM\Column(type="string", unique=true)
      */
-    private $type;
+    private $name;
     
     function getId() {
         return $this->id;
     }
 
-    function getType() {
-        return $this->type;
+    function getName()
+    {
+        return $this->name;
     }
 
     function setId($id) {
         $this->id = $id;
     }
 
-    function setType($type) {
-        $this->type = $type;
+    function setName($name)
+    {
+        $this->name = $name;
     }
 
 }

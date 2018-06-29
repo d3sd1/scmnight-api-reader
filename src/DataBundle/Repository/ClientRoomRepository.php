@@ -2,6 +2,7 @@
 
 namespace DataBundle\Repository;
 
+use DataBundle\Entity\Client;
 use Doctrine\ORM\EntityRepository;
 use DataBundle\Entity\ClientEntrance;
 use DataBundle\Entity\ClientRoom;
@@ -9,16 +10,10 @@ use DataBundle\Entity\ClientRoom;
 class ClientRoomRepository extends EntityRepository
 {
 
-    private function transform(ClientEntrance $object)
+    public function add(Client $client, $isVip)
     {
-        return new ClientRoom($object->getClient(), $object->getVip());
-    }
-
-    public function add(ClientEntrance $pEntrance)
-    {
-        $entrance = $this->transform($pEntrance);
         $em = $this->getEntityManager();
-        $em->persist($entrance);
+        $em->persist(new ClientRoom($client, $isVip));
         $em->flush();
     }
 

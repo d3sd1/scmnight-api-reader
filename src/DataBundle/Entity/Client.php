@@ -4,6 +4,7 @@ namespace DataBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
+use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\Exclude;
 
 /**
@@ -14,6 +15,7 @@ class Client
 {
 
     /**
+     * @Serializer\Expose()
      * @ORM\Id
      * @ORM\Column(type="string", length=10, nullable=false, unique=true)
      */
@@ -35,37 +37,30 @@ class Client
     private $surname2;
 
     /**
-     *
      * @ORM\Column(type="date")
      */
-    private $birthDate;
+    private $birthdate;
+
 
     /**
-     * @ORM\Column(type="string", length=100)
-     * @Exclude
-     */
-    private $serialNumber;
-
-    /**
-     * @ORM\Column(type="string", length=5)
+     * @ORM\ManyToOne(targetEntity="DataBundle\Entity\Nationality")
+     * @ORM\JoinColumn(name="nationality", referencedColumnName="id")
      */
     private $nationality;
 
     /**
-     * @ORM\Column(type="text")
-     * @Exclude
+     * @ORM\Column(type="string")
      */
-    private $biometric;
-    
+    private $address;
     /**
-     * @ORM\Column(type="boolean", options={"default" : false})
+     * @ORM\Column(type="string")
      */
-    private $conflictive;
+    private $email;
     
     
     /**
-     * @ORM\ManyToOne(targetEntity="\DataBundle\Entity\ClientGender"))
-     * @ORM\JoinColumn(onDelete="SET NULL")
+     * @ORM\ManyToOne(targetEntity="DataBundle\Entity\Gender")
+     * @ORM\JoinColumn(name="gender", referencedColumnName="id")
      */
     private $gender;
     
@@ -89,14 +84,9 @@ class Client
         return $this->surname2;
     }
 
-    public function getBirthDate()
+    public function getBirthdate()
     {
-        return $this->birthDate;
-    }
-
-    public function getSerialNumber()
-    {
-        return $this->serialNumber;
+        return $this->birthdate;
     }
 
     public function getNationality()
@@ -104,15 +94,6 @@ class Client
         return $this->nationality;
     }
 
-    public function getBiometric()
-    {
-        return $this->biometric;
-    }
-
-    public function getConflictive()
-    {
-        return $this->conflictive;
-    }
 
     public function setDni($dni)
     {
@@ -134,14 +115,9 @@ class Client
         $this->surname2 = $surname2;
     }
 
-    public function setBirthDate($birthDate)
+    public function setBirthdate($birthdate)
     {
-        $this->birthDate = $birthDate;
-    }
-
-    public function setSerialNumber($serialNumber)
-    {
-        $this->serialNumber = $serialNumber;
+        $this->birthdate = $birthdate;
     }
 
     public function setNationality($nationality)
@@ -149,15 +125,6 @@ class Client
         $this->nationality = $nationality;
     }
 
-    public function setBiometric($biometric)
-    {
-        $this->biometric = $biometric;
-    }
-
-    public function setConflictive($conflictive)
-    {
-        $this->conflictive = $conflictive;
-    }
 
     function getGender() {
         return $this->gender;
@@ -166,5 +133,38 @@ class Client
     function setGender($gender) {
         $this->gender = $gender;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getAddress()
+    {
+        return $this->address;
+    }
+
+    /**
+     * @param mixed $address
+     */
+    public function setAddress($address): void
+    {
+        $this->address = $address;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEmail()
+    {
+        return $this->email;
+    }
+
+    /**
+     * @param mixed $email
+     */
+    public function setEmail($email): void
+    {
+        $this->email = $email;
+    }
+
 
 }
