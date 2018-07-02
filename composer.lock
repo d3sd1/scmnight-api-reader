@@ -2069,37 +2069,95 @@
             "time": "2018-06-19T13:39:25+00:00"
         },
         {
+          "name": "lcobucci/jwt",
+          "version": "3.2.2",
+          "source": {
+            "type": "git",
+            "url": "https://github.com/lcobucci/jwt.git",
+            "reference": "0b5930be73582369e10c4d4bb7a12bac927a203c"
+          },
+          "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/lcobucci/jwt/zipball/0b5930be73582369e10c4d4bb7a12bac927a203c",
+            "reference": "0b5930be73582369e10c4d4bb7a12bac927a203c",
+            "shasum": ""
+          },
+          "require": {
+            "ext-openssl": "*",
+            "php": ">=5.5"
+          },
+          "require-dev": {
+            "mdanter/ecc": "~0.3.1",
+            "mikey179/vfsstream": "~1.5",
+            "phpmd/phpmd": "~2.2",
+            "phpunit/php-invoker": "~1.1",
+            "phpunit/phpunit": "~4.5",
+            "squizlabs/php_codesniffer": "~2.3"
+          },
+          "suggest": {
+            "mdanter/ecc": "Required to use Elliptic Curves based algorithms."
+          },
+          "type": "library",
+          "extra": {
+            "branch-alias": {
+              "dev-master": "3.1-dev"
+            }
+          },
+          "autoload": {
+            "psr-4": {
+              "Lcobucci\\JWT\\": "src"
+            }
+          },
+          "notification-url": "https://packagist.org/downloads/",
+          "license": [
+            "BSD-3-Clause"
+          ],
+          "authors": [
+            {
+              "name": "Luís Otávio Cobucci Oblonczyk",
+              "email": "lcobucci@gmail.com",
+              "role": "Developer"
+            }
+          ],
+          "description": "A simple library to work with JSON Web Token and JSON Web Signature",
+          "keywords": [
+            "JWS",
+            "jwt"
+          ],
+          "time": "2017-09-01T08:23:26+00:00"
+        },
+      {
             "name": "lexik/jwt-authentication-bundle",
-            "version": "v2.4.4",
+        "version": "v2.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/lexik/LexikJWTAuthenticationBundle.git",
-                "reference": "bcb8e2a658cc0ca3cc6949edf1c9b84ed4aa1277"
+              "reference": "260891378d3177eedf959e88c240c3bf7ab3ea42"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lexik/LexikJWTAuthenticationBundle/zipball/bcb8e2a658cc0ca3cc6949edf1c9b84ed4aa1277",
-                "reference": "bcb8e2a658cc0ca3cc6949edf1c9b84ed4aa1277",
+              "url": "https://api.github.com/repos/lexik/LexikJWTAuthenticationBundle/zipball/260891378d3177eedf959e88c240c3bf7ab3ea42",
+              "reference": "260891378d3177eedf959e88c240c3bf7ab3ea42",
                 "shasum": ""
             },
             "require": {
+              "lcobucci/jwt": "^3.2",
                 "namshi/jose": "^7.2",
                 "php": "^5.5|^7.0",
-                "symfony/console": "^2.8|^3.0|^4.0",
-                "symfony/framework-bundle": "^2.8|^3.0|^4.0",
-                "symfony/security-bundle": "^2.8|^3.0|^4.0"
+              "symfony/framework-bundle": "^3.4|^4.0",
+              "symfony/security-bundle": "^3.4|^4.0"
             },
             "require-dev": {
-                "friendsofphp/php-cs-fixer": "^1.1|^2.8@dev",
-                "lcobucci/jwt": "~3.2",
-                "symfony/browser-kit": "^2.8|^3.0|^4.0",
-                "symfony/dom-crawler": "^2.8|^3.0|^4.0",
-                "symfony/phpunit-bridge": "~3.3",
-                "symfony/yaml": "^2.8|^3.0|^4.0"
+              "friendsofphp/php-cs-fixer": "^1.1|^2.8",
+              "symfony/browser-kit": "^3.4|^4.0",
+              "symfony/console": "^3.4|^4.0",
+              "symfony/dom-crawler": "^3.4|^4.0",
+              "symfony/phpunit-bridge": "^3.4|^4.0",
+              "symfony/var-dumper": "^3.4|^4.0",
+              "symfony/yaml": "^3.4|^4.0"
             },
             "suggest": {
                 "gesdinet/jwt-refresh-token-bundle": "Implements a refresh token system over Json Web Tokens in Symfony",
-                "lcobucci/jwt": "For using the LcobucciJWTEncoder",
                 "spomky-labs/lexik-jose-bridge": "Provides a JWT Token encoder with encryption support"
             },
             "type": "symfony-bundle",
@@ -2162,7 +2220,7 @@
                 "rest",
                 "symfony"
             ],
-            "time": "2018-03-06T12:23:17+00:00"
+        "time": "2018-06-30T13:32:28+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -2960,16 +3018,16 @@
         },
         {
             "name": "react/dns",
-          "version": "v0.4.14",
+          "version": "v0.4.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/dns.git",
-              "reference": "75ae3286c03eb022a6fbf909e6148d5022588ba4"
+              "reference": "319e110a436d26a2fa137cfa3ef2063951715794"
             },
             "dist": {
                 "type": "zip",
-              "url": "https://api.github.com/repos/reactphp/dns/zipball/75ae3286c03eb022a6fbf909e6148d5022588ba4",
-              "reference": "75ae3286c03eb022a6fbf909e6148d5022588ba4",
+              "url": "https://api.github.com/repos/reactphp/dns/zipball/319e110a436d26a2fa137cfa3ef2063951715794",
+              "reference": "319e110a436d26a2fa137cfa3ef2063951715794",
                 "shasum": ""
             },
             "require": {
@@ -3001,7 +3059,7 @@
                 "dns-resolver",
                 "reactphp"
             ],
-          "time": "2018-06-26T08:20:02+00:00"
+          "time": "2018-07-02T12:17:56+00:00"
         },
         {
             "name": "react/event-loop",
@@ -3238,23 +3296,23 @@
         },
         {
             "name": "sensio/framework-extra-bundle",
-            "version": "v5.1.6",
+          "version": "v5.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sensiolabs/SensioFrameworkExtraBundle.git",
-                "reference": "bf4940572e43af679aaa13be98f3446a1c237bd8"
+              "reference": "50e8b7292425957b8fd66887504430c89bcbd83c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sensiolabs/SensioFrameworkExtraBundle/zipball/bf4940572e43af679aaa13be98f3446a1c237bd8",
-                "reference": "bf4940572e43af679aaa13be98f3446a1c237bd8",
+              "url": "https://api.github.com/repos/sensiolabs/SensioFrameworkExtraBundle/zipball/50e8b7292425957b8fd66887504430c89bcbd83c",
+              "reference": "50e8b7292425957b8fd66887504430c89bcbd83c",
                 "shasum": ""
             },
             "require": {
                 "doctrine/common": "^2.2",
                 "symfony/config": "^3.3|^4.0",
                 "symfony/dependency-injection": "^3.3|^4.0",
-                "symfony/framework-bundle": "^3.3|^4.0",
+              "symfony/framework-bundle": "^3.4|^4.0",
                 "symfony/http-kernel": "^3.3|^4.0"
             },
             "require-dev": {
@@ -3264,6 +3322,8 @@
                 "symfony/dom-crawler": "^3.3|^4.0",
                 "symfony/expression-language": "^3.3|^4.0",
                 "symfony/finder": "^3.3|^4.0",
+              "symfony/monolog-bridge": "^3.0|^4.0",
+              "symfony/monolog-bundle": "^3.2",
                 "symfony/phpunit-bridge": "^3.3|^4.0",
                 "symfony/psr-http-message-bridge": "^0.3",
                 "symfony/security-bundle": "^3.3|^4.0",
@@ -3280,7 +3340,7 @@
             "type": "symfony-bundle",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "5.1.x-dev"
+                  "dev-master": "5.2.x-dev"
                 }
             },
             "autoload": {
@@ -3303,7 +3363,7 @@
                 "annotations",
                 "controllers"
             ],
-            "time": "2018-02-14T08:40:54+00:00"
+          "time": "2018-05-12T09:37:42+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",

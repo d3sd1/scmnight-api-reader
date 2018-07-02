@@ -31,9 +31,9 @@ class Version20180406111451 extends AbstractMigration
         $this->addSql('INSERT INTO clients_entrance_type (name) VALUES ("DENIED_FULL")');
         $this->addSql('INSERT INTO clients_entrance_type (name) VALUES ("DENIED_CONFLICTIVE")');
         $this->addSql('INSERT INTO clients_entrance_type (name) VALUES ("FORCED_ACCESS")');
-        $this->addSql('INSERT INTO users_manage_type (TYPE) VALUES ("ADD")');
-        $this->addSql('INSERT INTO users_manage_type (TYPE) VALUES ("EDIT")');
-        $this->addSql('INSERT INTO users_manage_type (TYPE) VALUES ("DELETE")');
+        $this->addSql('INSERT INTO users_manage_type (name) VALUES ("ADD")');
+        $this->addSql('INSERT INTO users_manage_type (name) VALUES ("EDIT")');
+        $this->addSql('INSERT INTO users_manage_type (name) VALUES ("DELETE")');
         $this->addSql('INSERT INTO genders (name) VALUES ("M")');
         $this->addSql('INSERT INTO genders (name) VALUES ("F")');
         $this->addSql('INSERT INTO genders (name) VALUES ("NA")');
@@ -49,13 +49,10 @@ class Version20180406111451 extends AbstractMigration
         $this->addSql('insert  into `permissions_list`(`list_key_name`) values ("RESPONSABLE"),("SECURITY"),("WAITER"),("MARKETING"),("RRPP_BOSS"),("RRPP"),("SCM")');
         $this->addSql("insert  into `permissions`(`action`) values 
                             ('VIEW_DASHBOARD'),
-                            ('MANAGE_ROOM_BAR'),
                             ('MANAGE_PROFILE'),
                             ('MANAGE_USERS'),
                             ('VIEW_ALL_USERS'),
                             ('VIEW_ROOM_USERS'),
-                            ('MANAGE_ROOM_STAGE'),
-                            ('MANAGE_ROOM_RESERVED'),
                             ('VIEW_ROOM_CLIENTS'),
                             ('VIEW_ALL_CLIENTS'),
                             ('VIEW_MONETIZATION'),
@@ -66,6 +63,10 @@ class Version20180406111451 extends AbstractMigration
                             ('MANAGE_MARKETING_PARTIES'),
                             ('MANAGE_CONFIG'),
                             ('SET_USER_CONFLICTIVE'),
+                            ('SET_CLIENT_INFO'),
+                            ('MANAGE_ROOM_CONFLICTS'),
+                            ('MANAGE_ROOM_RATES'),
+                            ('MANAGE_ROOM_IMAGE'),
                             ('LOGOUT');");
     }
 
