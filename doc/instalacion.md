@@ -5,4 +5,4 @@ composer prod-install
 
 PASS PARA root en clioentes:
 
-agdtgr%6&sdfser!223aSSaSfdvhk
+NF;eWr$sR5[54w?h
