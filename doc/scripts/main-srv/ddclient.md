@@ -23,5 +23,5 @@ Config file:
 	server=dynamicdns.park-your-domain.com
 	login=scmnight.com
 	password=ef6247b670fc483b9a70617009a9ce05
-	@,*,www,dev
+	@,*,www,dev,*.dev.
 ----
