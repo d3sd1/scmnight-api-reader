@@ -42,12 +42,12 @@
     },
     "scripts": {
         "dev-install": [
-            "composer update",
+            "composer update ",
             "php bin/console cache:clear --no-debug",
             "php bin/console doctrine:database:create --if-not-exists --no-interaction",
             "php bin/console doctrine:schema:update --force --no-interaction",
             "php bin/console doctrine:migrations:migrate --no-interaction",
-            "openssl genrsa -out var/jwt/private.pem -aes256 -passout pass:g6GfdDs2453Ax 4096 && openssl rsa -pubout -in var/jwt/private.pem -out var/jwt/public.pem  -passin pass:g6GfdDs2453Ax",
+            "sudo mkdir -p var/jwt/ && sudo touch var/jwt/private.pem && sudo chmod 775 var/jwt/private.pem && openssl genrsa -out var/jwt/private.pem -aes256 -passout pass:g6GfdDs2453Ax 4096 && openssl rsa -pubout -in var/jwt/private.pem -out var/jwt/public.pem  -passin pass:g6GfdDs2453Ax",
             "php bin/console doctrine:fixtures:load --append"
         ],
         "prod-install": [
@@ -56,7 +56,7 @@
             "php bin/console doctrine:database:create --if-not-exists --no-interaction",
             "php bin/console doctrine:schema:update --force --no-interaction",
             "php bin/console doctrine:migrations:migrate --no-interaction",
-            "openssl genrsa -out var/jwt/private.pem -aes256 -passout pass:g6GfdDs2453Ax 4096 && openssl rsa -pubout -in var/jwt/private.pem -out var/jwt/public.pem  -passin pass:g6GfdDs2453Ax"
+            "sudo mkdir -p var/jwt/ && sudo touch var/jwt/private.pem && sudo chmod 775 var/jwt/private.pem && openssl genrsa -out var/jwt/private.pem -aes256 -passout pass:g6GfdDs2453Ax 4096 && openssl rsa -pubout -in var/jwt/private.pem -out var/jwt/public.pem  -passin pass:g6GfdDs2453Ax"
         ]
     },
     "extra": {

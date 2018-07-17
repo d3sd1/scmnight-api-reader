@@ -3,12 +3,61 @@
 namespace RestBundle\Controller;
 
 use DataBundle\Entity\ClientBan;
+use DataBundle\Entity\Gender;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations as Rest;
 
 class ClientController extends Controller
 {
+
+
+    /**
+     * @Rest\Post("/extradata")
+     */
+    public function editClientExtradataAction(Request $request)
+    {
+        $client = $this->container->get('jms_serializer')->deserialize($request->getContent(), "DataBundle\Entity\Client", "json");
+        $em = $this->getDoctrine()->getManager();
+        $clientDB = $em->getRepository('DataBundle:Client')->find($client->getDni());
+        if (null === $clientDB) {
+            return $this->get('response')->error(400, "USER_NOT_FOUND");
+        }
+        $clientDB->setEmail($client->getEmail());
+        $clientDB->setAddress($client->getAddress());
+        try{
+            $newGender = $em->getRepository("DataBundle:Gender")->find($client->getGender()->getId());
+        }
+        catch(\Exception $e)
+        {
+            return $this->get('response')->error(400, "GENDER_NOT_FOUND");
+        }
+        $clientDB->setGender($newGender);
+        $client->getGender()->setName($newGender->getName());
+        $em->flush();
+        try {
+            $pusher = $this->container->get('websockets.pusher');
+            $pusher->push($this->container->get('jms_serializer')->serialize($client, "json"), 'api_clients_extradata');
+        } catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
+            $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
+        }
+
+        return $this->get('response')->success("USER_EDIT_SUCCESS", $client);
+    }
+
+    /**
+     * @Rest\View()
+     * @Rest\Get("/genders")
+     */
+    public function clientEntranceInfoGendersAction(Request $request)
+    {
+        $em = $this->get('doctrine.orm.entity_manager');
+        $genders = $em->getRepository('DataBundle:Gender')->findAll();
+        if (null === $genders) {
+            $genders = [];
+        }
+        return $this->get('response')->success("", $genders);
+    }
 
     /**
      * @Rest\Get("/conflictive_reasons")
@@ -113,7 +162,7 @@ class ClientController extends Controller
         $selectData = "DataBundle:ClientEntrance";
         $mainOrder = array("column" => "date", "dir" => "DESC");
         $data = $tables->generateTableResponse($params, $selectData, $mainOrder);
-        return $this->get('response')->success("",$data);
+        return $this->get('response')->success("", $data);
     }
 
     /**
@@ -127,7 +176,7 @@ class ClientController extends Controller
         $selectData = "DataBundle:ClientRoom";
         $mainOrder = array("column" => "date", "dir" => "DESC");
         $data = $tables->generateTableResponse($params, $selectData, $mainOrder);
-        return $this->get('response')->success("",$data);
+        return $this->get('response')->success("", $data);
     }
 
     /**

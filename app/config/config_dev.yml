@@ -4,9 +4,9 @@ imports:
 parameters:
     database_host: 127.0.0.1
     database_port: 3306
-    database_name: scm_rest
+    database_name: scm_dev_discoexample
     database_user: root
-    database_password: 1234
+    database_password: Q5KOavC2VzpI
     mailer_transport: smtp
     mailer_host: mail.privateemail.com
     mailer_user: admin@scmnight.com
@@ -16,7 +16,7 @@ parameters:
     cors_allow_origin: '*'
     jwt_key_pass_phrase: g6GfdDs2453Ax
     websocket_host: 127.0.0.1
-    websocket_port: 9846
+    websocket_port: 50002
     
 framework:
     router:

@@ -5,6 +5,8 @@ services:
         class: WebSocketsBundle\Topic\AuthTopic
     sockets.users:
         class: WebSocketsBundle\Topic\UsersTopic
+    sockets.clients.extradata:
+        class: WebSocketsBundle\Topic\ClientsExtraDataTopic
     sockets.users.entrances:
         class: WebSocketsBundle\Topic\UsersEntranceTopic
     sockets.clients.entrances:

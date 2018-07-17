@@ -1,9 +1,9 @@
 imports:
     - { resource: config.yml }
 parameters:
-    database_host: 127.0.0.1
+    database_host: 192.168.1.2
     database_port: 3306
-    database_name: sandbox
+    database_name: scm_disco
     database_user: scm
     database_password: Q5KOavC2VzpI
     mailer_transport: smtp

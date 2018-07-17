@@ -56,13 +56,15 @@ gos_web_socket:
         - "@sockets.users.manage"
         - "@sockets.config.manage"
         - "@sockets.users.entrances"
+        - "@sockets.users.entrances"
+        - "@sockets.clients.extradata"
         - "@sockets.clients.entrances"
         - "@sockets.clients.bans"
     shared_config: false
     server:
         port: '%websocket_port%'
         host: '%websocket_host%'
-        origin_check: true
+        origin_check: false
         router:
             resources:
                 - "@WebSocketsBundle/Resources/config/channels.yml"
@@ -71,7 +73,6 @@ gos_web_socket:
             port: '%websocket_port%'
             host: '%websocket_host%'
     client:
-        firewall: main
         session_handler: session.handler.native_file
 framework:
     secret:          "%secret%"
