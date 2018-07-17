@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="13acc823-910d-457f-b76d-b4cbee3edbe5" name="WORKOUT CENTRAL - API EXAMPLEDISCO DEV" url="http://scmnight.com">
+        <fileTransfer host="scmnight.com" port="2022" rootFolder="/var/www/html/discoexample.dev.scmnight.com/rest" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+          <option name="port" value="2022" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

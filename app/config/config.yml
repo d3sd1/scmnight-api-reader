@@ -60,6 +60,8 @@ gos_web_socket:
         - "@sockets.clients.extradata"
         - "@sockets.clients.entrances"
         - "@sockets.clients.bans"
+        - "@sockets.conflictreasons.manage"
+        - "@sockets.rates.manage"
     shared_config: false
     server:
         port: '%websocket_port%'

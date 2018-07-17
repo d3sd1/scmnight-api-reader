@@ -41,7 +41,7 @@ class ClientBan
     /**
      * @param mixed $ban
      */
-    public function setBan($ban): void
+    public function setBan($ban)
     {
         $this->ban = $ban;
     }

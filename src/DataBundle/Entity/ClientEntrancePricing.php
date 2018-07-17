@@ -30,6 +30,18 @@ class ClientEntrancePricing
     private $name;
 
     /**
+     * @Serializer\Expose()
+     * @ORM\Column(type="string",nullable=true)
+     */
+    private $trans_es;
+
+    /**
+     * @Serializer\Expose()
+     * @ORM\Column(type="string",nullable=true)
+     */
+    private $trans_en;
+
+    /**
      * Precio en euros con céntimos.
      * @Serializer\Expose()
      * @ORM\Column(type="float")
@@ -67,5 +79,38 @@ class ClientEntrancePricing
     {
         $this->price = $price;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getTransEs()
+    {
+        return $this->trans_es;
+    }
+
+    /**
+     * @param mixed $trans_es
+     */
+    public function setTransEs($trans_es)
+    {
+        $this->trans_es = $trans_es;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTransEn()
+    {
+        return $this->trans_en;
+    }
+
+    /**
+     * @param mixed $trans_en
+     */
+    public function setTransEn($trans_en)
+    {
+        $this->trans_en = $trans_en;
+    }
+
 
 }

@@ -17,6 +17,10 @@ services:
         class: WebSocketsBundle\Topic\ManageUsersTopic
     sockets.config.manage:
         class: WebSocketsBundle\Topic\ManageConfigTopic
+    sockets.conflictreasons.manage:
+        class: WebSocketsBundle\Topic\ConflictReasonTopic
+    sockets.rates.manage:
+        class: WebSocketsBundle\Topic\RatesManageTopic
         
     gos_web_socket_server.client_event.listener:
         class: WebSocketsBundle\EventListener\ConnectionListener

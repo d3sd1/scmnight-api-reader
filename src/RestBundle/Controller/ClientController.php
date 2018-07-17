@@ -3,7 +3,10 @@
 namespace RestBundle\Controller;
 
 use DataBundle\Entity\ClientBan;
+use DataBundle\Entity\ConflictReasonManage;
 use DataBundle\Entity\Gender;
+use DataBundle\Entity\RateManage;
+use DataBundle\Entity\RateManageType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -49,7 +52,7 @@ class ClientController extends Controller
      * @Rest\View()
      * @Rest\Get("/genders")
      */
-    public function clientEntranceInfoGendersAction(Request $request)
+    public function clientInfoGendersAction(Request $request)
     {
         $em = $this->get('doctrine.orm.entity_manager');
         $genders = $em->getRepository('DataBundle:Gender')->findAll();
@@ -57,6 +60,212 @@ class ClientController extends Controller
             $genders = [];
         }
         return $this->get('response')->success("", $genders);
+    }
+
+    /**
+     * @Rest\Post("/conflictreason")
+     */
+    public function postConflictiveReasonAction(Request $request)
+    {
+        $conflictReason = $this->container->get('jms_serializer')->deserialize($request->getContent(), "DataBundle\Entity\ClientBanType", "json");
+        $em = $this->get('doctrine.orm.entity_manager');
+
+        $conflictReasonDB = $em->getRepository('DataBundle:ClientBanType')->find($conflictReason->getId());
+        if (null === $conflictReasonDB) {
+            return $this->get('response')->error(400, "CONFLICTREASON_NOT_FOUND");
+        }
+        $conflictReasonDB->setTransEs($conflictReason->getTransEs());
+        $conflictReasonDB->setTransEn($conflictReason->getTransEn());
+        $em->flush();
+
+        $conflictReasonManage = new ConflictReasonManage();
+        $conflictReasonManage->setConflictReason($conflictReasonDB);
+        $conflictReasonManage->setUser($this->get('security.token_storage')->getToken()->getUser());
+        $conflictReasonManage->setType($em->getRepository('DataBundle:ConflictReasonManageType')->findOneBy(array("name" => "EDIT")));
+        $em->persist($conflictReasonManage);
+        $em->flush();
+        try {
+            $pusher = $this->container->get('websockets.pusher');
+            $pusher->push($this->container->get('jms_serializer')->serialize($conflictReasonManage, "json"), 'api_conflictreasons');
+        } catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
+            $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
+        }
+        $em->flush();
+        return $this->get('response')->success("CONFLICTREASON_UPDATED");
+    }
+
+    /**
+     * @Rest\Put("/conflictreason")
+     */
+    public function putConflictiveReasonAction(Request $request)
+    {
+        $conflictReason = $this->container->get('jms_serializer')->deserialize($request->getContent(), "DataBundle\Entity\ClientBanType", "json");
+        $em = $this->get('doctrine.orm.entity_manager');
+        $conflictReasonDB = $em->getRepository('DataBundle:ClientBanType')->findOneBy(["name" => $conflictReason->getName()]);
+        if (null !== $conflictReasonDB) {
+            return $this->get('response')->error(400, "CONFLICTREASON_ALREADY_ONDB");
+        }
+        $em->persist($conflictReason);
+        $em->flush();
+
+        $conflictReasonManage = new ConflictReasonManage();
+        $conflictReasonManage->setConflictReason($conflictReason);
+        $conflictReasonManage->setUser($this->get('security.token_storage')->getToken()->getUser());
+        $conflictReasonManage->setType($em->getRepository('DataBundle:ConflictReasonManageType')->findOneBy(array("name" => "ADD")));
+        $em->persist($conflictReasonManage);
+        $em->flush();
+        try {
+            $pusher = $this->container->get('websockets.pusher');
+            $pusher->push($this->container->get('jms_serializer')->serialize($conflictReasonManage, "json"), 'api_conflictreasons');
+        } catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
+            $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
+        }
+        $em->flush();
+        return $this->get('response')->success("CONFLICTREASON_CREATED");
+    }
+
+    /**
+     * @Rest\Delete("/conflictreason/{id}")
+     */
+    public function delConflictiveReasonAction(Request $request)
+    {
+        $em = $this->get('doctrine.orm.entity_manager');
+        $conflictReasonDB = $em->getRepository('DataBundle:ClientBanType')->findOneBy(["id" => $request->get('id')]);
+        if (null === $conflictReasonDB) {
+            return $this->get('response')->error(400, "CONFLICTREASON_NOT_FOUND");
+        }
+
+        $conflictReasonManage = new ConflictReasonManage();
+        $conflictReasonManage->setConflictReason($conflictReasonDB);
+        $conflictReasonManage->setUser($this->get('security.token_storage')->getToken()->getUser());
+        $conflictReasonManage->setType($em->getRepository('DataBundle:ConflictReasonManageType')->findOneBy(array("name" => "DELETE")));
+        $em->persist($conflictReasonManage);
+        try {
+            $pusher = $this->container->get('websockets.pusher');
+            $pusher->push($this->container->get('jms_serializer')->serialize($conflictReasonManage, "json"), 'api_conflictreasons');
+        } catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
+            $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
+        }
+        $em->remove($conflictReasonDB);
+        $em->flush();
+        return $this->get('response')->success("CONFLICTREASON_DELETED");
+    }
+
+
+    /**
+     * @Rest\Post("/table/conflictreasons")
+     */
+    public function clientsConflictReasonsCrudTableAction(Request $request)
+    {
+        $params = $request->request->all();
+        $tables = $this->container->get("Tables");
+        $selectData = "DataBundle:ClientBanType";
+        $mainOrder = array("column" => "id", "dir" => "DESC");
+        $data = $tables->generateTableResponse($params, $selectData, $mainOrder);
+        return $this->get('response')->success("", $data);
+    }
+
+    /**
+     * @Rest\Post("/table/rates")
+     */
+    public function clientsRatesCrudTableAction(Request $request)
+    {
+        $params = $request->request->all();
+        $tables = $this->container->get("Tables");
+        $selectData = "DataBundle:ClientEntrancePricing";
+        $mainOrder = array("column" => "id", "dir" => "DESC");
+        $data = $tables->generateTableResponse($params, $selectData, $mainOrder);
+        return $this->get('response')->success("", $data);
+    }
+
+    /**
+     * @Rest\Post("/rate")
+     */
+    public function postRateAction(Request $request)
+    {
+        $rate = $this->container->get('jms_serializer')->deserialize($request->getContent(), "DataBundle\Entity\ClientEntrancePricing", "json");
+        $em = $this->get('doctrine.orm.entity_manager');
+
+        $rateDB = $em->getRepository('DataBundle:ClientEntrancePricing')->find($rate->getId());
+        if (null === $rateDB) {
+            return $this->get('response')->error(400, "RATE_NOT_FOUND");
+        }
+        $rateDB->setTransEs($rate->getTransEs());
+        $rateDB->setTransEn($rate->getTransEn());
+        $rateDB->setPrice($rate->getPrice());
+        $em->flush();
+
+        $rateReasonManage = new RateManage();
+        $rateReasonManage->setRate($rateDB);
+        $rateReasonManage->setUser($this->get('security.token_storage')->getToken()->getUser());
+        $rateReasonManage->setType($em->getRepository('DataBundle:RateManageType')->findOneBy(array("name" => "EDIT")));
+        $em->persist($rateReasonManage);
+        $em->flush();
+        try {
+            $pusher = $this->container->get('websockets.pusher');
+            $pusher->push($this->container->get('jms_serializer')->serialize($rateReasonManage, "json"), 'api_rates');
+        } catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
+            $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
+        }
+        $em->flush();
+        return $this->get('response')->success("RATE_UPDATED");
+    }
+
+    /**
+     * @Rest\Put("/rate")
+     */
+    public function putRateAction(Request $request)
+    {
+        $rate = $this->container->get('jms_serializer')->deserialize($request->getContent(), "DataBundle\Entity\ClientEntrancePricing", "json");
+        $em = $this->get('doctrine.orm.entity_manager');
+        $rateDB = $em->getRepository('DataBundle:ClientEntrancePricing')->findOneBy(["name" => $rate->getName()]);
+        if (null !== $rateDB) {
+            return $this->get('response')->error(400, "RATE_ALREADY_ONDB");
+        }
+        $em->persist($rate);
+        $em->flush();
+
+        $rateReasonManage = new RateManage();
+        $rateReasonManage->setRate($rate);
+        $rateReasonManage->setUser($this->get('security.token_storage')->getToken()->getUser());
+        $rateReasonManage->setType($em->getRepository('DataBundle:RateManageType')->findOneBy(array("name" => "ADD")));
+        $em->persist($rateReasonManage);
+        $em->flush();
+        try {
+            $pusher = $this->container->get('websockets.pusher');
+            $pusher->push($this->container->get('jms_serializer')->serialize($rateReasonManage, "json"), 'api_rates');
+        } catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
+            $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
+        }
+        $em->flush();
+        return $this->get('response')->success("RATE_CREATED");
+    }
+
+    /**
+     * @Rest\Delete("/rate/{id}")
+     */
+    public function delRateAction(Request $request)
+    {
+        $em = $this->get('doctrine.orm.entity_manager');
+        $rateDB = $em->getRepository('DataBundle:ClientEntrancePricing')->findOneBy(["id" => $request->get('id')]);
+        if (null === $rateDB) {
+            return $this->get('response')->error(400, "RATE_NOT_FOUND");
+        }
+
+        $rateManage = new RateManage();
+        $rateManage->setRate($rateDB);
+        $rateManage->setUser($this->get('security.token_storage')->getToken()->getUser());
+        $rateManage->setType($em->getRepository('DataBundle:RateManageType')->findOneBy(array("name" => "DELETE")));
+        $em->persist($rateManage);
+        try {
+            $pusher = $this->container->get('websockets.pusher');
+            $pusher->push($this->container->get('jms_serializer')->serialize($rateManage, "json"), 'api_rates');
+        } catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
+            $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
+        }
+        $em->remove($rateDB);
+        $em->flush();
+        return $this->get('response')->success("CONFLICTREASON_DELETED");
     }
 
     /**

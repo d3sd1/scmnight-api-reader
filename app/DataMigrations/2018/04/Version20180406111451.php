@@ -34,6 +34,12 @@ class Version20180406111451 extends AbstractMigration
         $this->addSql('INSERT INTO users_manage_type (name) VALUES ("ADD")');
         $this->addSql('INSERT INTO users_manage_type (name) VALUES ("EDIT")');
         $this->addSql('INSERT INTO users_manage_type (name) VALUES ("DELETE")');
+        $this->addSql('INSERT INTO conflict_reason_manage_type (name) VALUES ("ADD")');
+        $this->addSql('INSERT INTO conflict_reason_manage_type (name) VALUES ("EDIT")');
+        $this->addSql('INSERT INTO conflict_reason_manage_type (name) VALUES ("DELETE")');
+        $this->addSql('INSERT INTO rate_manage_type (name) VALUES ("ADD")');
+        $this->addSql('INSERT INTO rate_manage_type (name) VALUES ("EDIT")');
+        $this->addSql('INSERT INTO rate_manage_type (name) VALUES ("DELETE")');
         $this->addSql('INSERT INTO genders (name) VALUES ("M")');
         $this->addSql('INSERT INTO genders (name) VALUES ("F")');
         $this->addSql('INSERT INTO genders (name) VALUES ("NA")');
@@ -43,8 +49,11 @@ class Version20180406111451 extends AbstractMigration
         $this->addSql('insert  into `config`(`config`,`value`, dataType) values  ("disco_name","Mi discoteca",2)');
         $this->addSql('insert  into `config`(`config`,`value`, dataType) values  ("recover_code_seconds_expire","600",1)');
         $this->addSql('insert  into `scm_config`(`config`,`value`) values  ("version","0.7.1")');
-        $this->addSql('insert  into `clients_entrance_pricing`(`name`,`price`) values  ("Gratis por RRPP","0"),("Entrada por RRPP","5"),("Entrada general","10"),("Invitado","0"),("Empleado","0")');
-        $this->addSql('insert  into `clients_ban_type`(`name`) values ("Altercados"), ("Estado de embriaguez"), ("Consumo de drogas"), ("Agresiones")');
+        $this->addSql('insert  into `clients_entrance_pricing`(trans_es,trans_en,`name`,`price`) values 
+                    ("Gratis por RRPP", "Free by RRPP", "RRPP_FREE","0"),("Entrada por RRPP", "Entrance by RRPP", "RRPP_FLYER","5"),("Entrada general", "General entrance", "GENERAL","10"),
+                    ("Invitado", "Guest", "GUEST","0"),("Empleado", "Worker", "INTERNAL_WORKER","0")');
+        $this->addSql('insert  into `clients_ban_type`(`name`,trans_es,trans_en) values 
+                      ("DISPUTES","Altercados","Disputes"), ("TOO_DRUNKED","Estado de embriaguez","Too drunked"), ("DRUGS_CONSUME","Consumo de drogas","Drugs consuming"), ("AGGRESSIONS","Agresiones","Aggressions")');
         $this->addSql('insert  into `nationalities`(`name`) values ("ES")');
         $this->addSql('insert  into `permissions_list`(`list_key_name`) values ("RESPONSABLE"),("SECURITY"),("WAITER"),("MARKETING"),("RRPP_BOSS"),("RRPP"),("SCM")');
         $this->addSql("insert  into `permissions`(`action`) values 
@@ -67,6 +76,8 @@ class Version20180406111451 extends AbstractMigration
                             ('MANAGE_ROOM_CONFLICTS'),
                             ('MANAGE_ROOM_RATES'),
                             ('MANAGE_ROOM_IMAGE'),
+                            ('VIEW_SERVER_STATUS'),
+                            ('SELL_STOCK'),
                             ('LOGOUT');");
     }
 

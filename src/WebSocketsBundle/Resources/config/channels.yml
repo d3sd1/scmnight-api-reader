@@ -30,6 +30,14 @@ api_clients_extradata:
     channel: scm/clients_extradata
     handler:
         callback: 'extradata.client.topic'
+api_conflictreasons:
+    channel: scm/conflictreasons_manage
+    handler:
+        callback: 'manage.conflictreasons.topic'
+api_rates:
+    channel: scm/rates_manage
+    handler:
+        callback: 'manage.rates.topic'
 auth_guard:
     channel: scm/auth
     handler:
