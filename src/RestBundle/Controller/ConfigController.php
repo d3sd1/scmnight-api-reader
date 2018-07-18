@@ -68,9 +68,19 @@ class ConfigController extends Controller {
         }
         $em = $this->get('doctrine.orm.entity_manager');
         $logo = $em->getRepository('DataBundle:ExtraConfig')->findOneBy(["config" => "base64_logo"]);
-        $logo->setValue($img);
-        $em->flush();
-        //TODO: avisar por WS.
+        try{
+            $logo->setValue($img);
+            $em->flush();
+        }
+        catch(\Exception $e){
+            return $this->get('response')->error(400, "INVALID_LOGO_MBSIZEIMAGE");
+        }
+        try {
+            $pusher = $this->container->get('websockets.pusher');
+            $pusher->push($img, 'api_logo');
+        } catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
+            $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
+        }
         return $this->get('response')->success("LOGO_IMAGE_CHANGED");
     }
 

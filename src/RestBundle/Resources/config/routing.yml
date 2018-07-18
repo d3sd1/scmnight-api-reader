@@ -28,4 +28,8 @@ config:
     type:       rest
     resource:   RestBundle\Controller\ConfigController
     prefix:   /config
-    
+# Session data
+sessiondata:
+    type:       rest
+    resource:   RestBundle\Controller\SessionDataController
+    prefix:   /sessiondata

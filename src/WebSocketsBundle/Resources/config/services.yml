@@ -21,6 +21,8 @@ services:
         class: WebSocketsBundle\Topic\ConflictReasonTopic
     sockets.rates.manage:
         class: WebSocketsBundle\Topic\RatesManageTopic
+    sockets.config.logo:
+        class: WebSocketsBundle\Topic\LogoConfigTopic
         
     gos_web_socket_server.client_event.listener:
         class: WebSocketsBundle\EventListener\ConnectionListener

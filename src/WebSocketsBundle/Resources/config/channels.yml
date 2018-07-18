@@ -30,6 +30,10 @@ api_clients_extradata:
     channel: scm/clients_extradata
     handler:
         callback: 'extradata.client.topic'
+api_logo:
+    channel: scm/config_logo
+    handler:
+        callback: 'logo.config.topic'
 api_conflictreasons:
     channel: scm/conflictreasons_manage
     handler:
