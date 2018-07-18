@@ -23,6 +23,8 @@ services:
         class: WebSocketsBundle\Topic\RatesManageTopic
     sockets.config.logo:
         class: WebSocketsBundle\Topic\LogoConfigTopic
+    sockets.translations:
+        class: WebSocketsBundle\Topic\TranslationsTopic
         
     gos_web_socket_server.client_event.listener:
         class: WebSocketsBundle\EventListener\ConnectionListener

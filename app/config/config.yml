@@ -63,6 +63,7 @@ gos_web_socket:
         - "@sockets.conflictreasons.manage"
         - "@sockets.rates.manage"
         - "@sockets.config.logo"
+        - "@sockets.translations"
     shared_config: false
     server:
         port: '%websocket_port%'

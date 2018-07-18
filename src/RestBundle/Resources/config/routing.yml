@@ -33,3 +33,8 @@ sessiondata:
     type:       rest
     resource:   RestBundle\Controller\SessionDataController
     prefix:   /sessiondata
+# Stock
+stock:
+    type:       rest
+    resource:   RestBundle\Controller\StockController
+    prefix:   /stock

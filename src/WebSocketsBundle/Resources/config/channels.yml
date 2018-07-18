@@ -42,6 +42,10 @@ api_rates:
     channel: scm/rates_manage
     handler:
         callback: 'manage.rates.topic'
+api_translations:
+    channel: scm/translations
+    handler:
+        callback: 'translations.topic'
 auth_guard:
     channel: scm/auth
     handler:

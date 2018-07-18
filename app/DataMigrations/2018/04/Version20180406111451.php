@@ -57,6 +57,7 @@ class Version20180406111451 extends AbstractMigration
                       ("DISPUTES","Altercados","Disputes"), ("TOO_DRUNKED","Estado de embriaguez","Too drunked"), ("DRUGS_CONSUME","Consumo de drogas","Drugs consuming"), ("AGGRESSIONS","Agresiones","Aggressions")');
         $this->addSql('insert  into `nationalities`(`name`) values ("ES")');
         $this->addSql('insert  into `permissions_list`(`list_key_name`) values ("RESPONSABLE"),("SECURITY"),("WAITER"),("MARKETING"),("RRPP_BOSS"),("RRPP"),("SCM")');
+        $this->addSql('insert  into `custom_translate_available_langs`(`lang_key`) values ("es"),("en")');
         $this->addSql("insert  into `permissions`(`action`) values 
                             ('VIEW_DASHBOARD'),
                             ('MANAGE_PROFILE'),
@@ -80,6 +81,9 @@ class Version20180406111451 extends AbstractMigration
                             ('VIEW_SERVER_STATUS'),
                             ('SELL_STOCK'),
                             ('CHANGE_LOGO'),
+                            ('MANAGE_PERMISSIONS'),
+                            ('MANAGE_TRANSLATES'),
+                            ('MANAGE_STOCK_TYPES'),
                             ('LOGOUT');");
     }
 
