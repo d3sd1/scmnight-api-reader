@@ -3,13 +3,76 @@
 namespace RestBundle\Controller;
 
 use DataBundle\Entity\ConfigType;
+use RestBundle\Utils\Random;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use DataBundle\Entity\ConfigManage;
 
 class ConfigController extends Controller {
+    /**
+     * @Rest\Post("/logo")
+     */
+    public function postLogoAction(Request $request) {
+        /*
+        Check if user sent good data
+        */
+        try{
+            $body = json_decode($request->getContent(),true);
+        }
+        catch(\Exception $e)
+        {
+            return $this->get('response')->error(400, "INVALID_LOGO_IMAGE");
+        }
+        if(!array_key_exists('img',$body))
+        {
+            return $this->get('response')->error(400, "INVALID_LOGO_IMAGE");
+        }
 
+        $img = $body['img'];
+        /* Validar imagen en B64 y, de paso, obtener su info */
+        try{
+            $imgMetadata = getimagesize($img);
+            $imgBSize = (int) (strlen(rtrim($img, '=')) * 3 / 4);
+            $imgKbSize    = $imgBSize / 1024;
+            $imgMbSize    = $imgKbSize / 1024;
+        }
+        catch(\Exception $e)
+        {
+            return $this->get('response')->error(400, "INVALID_LOGO_IMAGE");
+        }
+
+        /*
+         * Check image MB size. Max allowed: 10.
+         */
+        if($imgMbSize > 10)
+        {
+            return $this->get('response')->error(400, "INVALID_LOGO_MBSIZEIMAGE");
+        }
+        /*
+        Check if it's on valid format. Accepted: SVG, PNG 'n JPG/JPEG
+        */
+        $myme = $imgMetadata["mime"];
+        $validMymes = array(
+            "image/png",
+            "image/x-citrix-png	",
+            "image/x-png	",
+            "image/svg+xml",
+            "image/jpeg",
+            "image/x-citrix-jpeg",
+            "image/pjpeg"
+        );
+        if(!in_array($myme, $validMymes))
+        {
+            return $this->get('response')->error(400, "INVALID_LOGO_FORMATIMAGE");
+        }
+        $em = $this->get('doctrine.orm.entity_manager');
+        $logo = $em->getRepository('DataBundle:ExtraConfig')->findOneBy(["config" => "base64_logo"]);
+        $logo->setValue($img);
+        $em->flush();
+        //TODO: avisar por WS.
+        return $this->get('response')->success("LOGO_IMAGE_CHANGED");
+    }
 
     /**
      * @Rest\Get("/find/{name}")

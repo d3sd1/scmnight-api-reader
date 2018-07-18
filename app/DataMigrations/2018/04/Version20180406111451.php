@@ -48,6 +48,7 @@ class Version20180406111451 extends AbstractMigration
         $this->addSql('insert  into `config`(`config`,`value`, dataType) values  ("maxPersonsInRoom","1000",1)');
         $this->addSql('insert  into `config`(`config`,`value`, dataType) values  ("disco_name","Mi discoteca",2)');
         $this->addSql('insert  into `config`(`config`,`value`, dataType) values  ("recover_code_seconds_expire","600",1)');
+        $this->addSql('insert  into `extra_config`(`config`,`value`) values  ("base64_logo","")');
         $this->addSql('insert  into `scm_config`(`config`,`value`) values  ("version","0.7.1")');
         $this->addSql('insert  into `clients_entrance_pricing`(trans_es,trans_en,`name`,`price`) values 
                     ("Gratis por RRPP", "Free by RRPP", "RRPP_FREE","0"),("Entrada por RRPP", "Entrance by RRPP", "RRPP_FLYER","5"),("Entrada general", "General entrance", "GENERAL","10"),
@@ -78,6 +79,7 @@ class Version20180406111451 extends AbstractMigration
                             ('MANAGE_ROOM_IMAGE'),
                             ('VIEW_SERVER_STATUS'),
                             ('SELL_STOCK'),
+                            ('CHANGE_LOGO'),
                             ('LOGOUT');");
     }
 
