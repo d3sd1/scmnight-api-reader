@@ -12,16 +12,9 @@ class CustomTranslate{
 
     /**
      * @ORM\Id
-     * @Exclude
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="string", nullable=false)
      */
-    private $id;
-
-    /**
-     * @ORM\Column(type="string")
-     */
-    private $key;
+    private $keyId;
 
     /**
      * @ORM\Column(type="string")
@@ -30,6 +23,7 @@ class CustomTranslate{
 
 
     /**
+     * @ORM\Id
      * @ORM\ManyToOne(targetEntity="\DataBundle\Entity\CustomTranslateAvailableLangs"))
      * @ORM\JoinColumn(onDelete="CASCADE")
      */
@@ -38,33 +32,17 @@ class CustomTranslate{
     /**
      * @return mixed
      */
-    public function getId()
+    public function getKeyId()
     {
-        return $this->id;
+        return $this->keyId;
     }
 
     /**
-     * @param mixed $id
+     * @param mixed $keyId
      */
-    public function setId($id)
+    public function setKeyId($keyId)
     {
-        $this->id = $id;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getKey()
-    {
-        return $this->key;
-    }
-
-    /**
-     * @param mixed $key
-     */
-    public function setKey($key)
-    {
-        $this->key = $key;
+        $this->keyId = $keyId;
     }
 
     /**

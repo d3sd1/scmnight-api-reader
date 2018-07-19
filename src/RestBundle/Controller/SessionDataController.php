@@ -11,6 +11,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations as Rest;
 
+/**
+ * @Rest\Route("/session")
+ */
 class SessionDataController extends Controller
 {
     /**
@@ -44,21 +47,78 @@ class SessionDataController extends Controller
 
     /**
      * @Rest\View()
+     * @Rest\Get("/translates")
+     */
+    public function sessionTranslateGetAction(Request $request)
+    {
+        $config = $this->get('doctrine.orm.entity_manager')
+            ->getRepository('DataBundle:CustomTranslate')
+            ->findAll();
+        return $this->get('response')->success("", $config);
+    }
+    /**
+     * @Rest\View()
      * @Rest\Post("/translates")
      */
     public function sessionTranslateChangeAction(Request $request)
     {
         $customTranslate = $this->container->get('jms_serializer')->deserialize($request->getContent(), "DataBundle\Entity\CustomTranslate", "json");
         $em = $this->get('doctrine.orm.entity_manager');
+
+        $langKey = $em->getRepository('DataBundle:CustomTranslateAvailableLangs')->findOneBy(["langKey" => $customTranslate->getLangKey()->getLangKey()]);
+        if(null === $langKey){
+            return $this->get('response')->error(400, "LANG_NOT_FOUND");
+        }
         $customTranslateDB = $em->getRepository('DataBundle:CustomTranslate')->findOneBy([
-            "key" => $customTranslate->getKey(),
-            "langKey" => $em->getRepository('DataBundle:CustomTranslateAvailableLangs')->findOneBy(["langKey" => $customTranslate->getLangKey()->getLangKey()])
+            "keyId" => $customTranslate->getKeyId(),
+            "langKey" => $langKey
         ]);
+        /* agregar clave dinámicamente */
         if(null === $customTranslateDB)
         {
-            return $this->get('response')->error(400, "LANG_KEY_NOT_FOUND");
+            $customTranslate->setLangKey($langKey);
+            $em->persist($customTranslate);
         }
-        $customTranslateDB->setValue($customTranslate->getValue());
+        else{
+            $customTranslateDB->setValue($customTranslate->getValue());
+        }
+        $em->flush();
+        try {
+            $pusher = $this->container->get('websockets.pusher');
+            $pusher->push($this->container->get('jms_serializer')->serialize($customTranslate, "json"), 'api_translations');
+        } catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
+            $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
+        }
+        return $this->get('response')->success("LANG_KEY_UPDATED", $customTranslate);
+    }
+
+
+    /**
+     * @Rest\View()
+     * @Rest\Post("/translatesmulti")
+     */
+    public function sessionTranslateChangeMultiAction(Request $request)
+    {
+        $customTranslate = $this->container->get('jms_serializer')->deserialize($request->getContent(), "DataBundle\Entity\CustomTranslate", "json");
+        $em = $this->get('doctrine.orm.entity_manager');
+
+        $langKey = $em->getRepository('DataBundle:CustomTranslateAvailableLangs')->findOneBy(["langKey" => $customTranslate->getLangKey()->getLangKey()]);
+        if(null === $langKey){
+            return $this->get('response')->error(400, "LANG_NOT_FOUND");
+        }
+        $customTranslateDB = $em->getRepository('DataBundle:CustomTranslate')->findOneBy([
+            "keyId" => $customTranslate->getKeyId(),
+            "langKey" => $langKey
+        ]);
+        /* agregar clave dinámicamente */
+        if(null === $customTranslateDB)
+        {
+            $customTranslate->setLangKey($langKey);
+            $em->persist($customTranslate);
+        }
+        else{
+            $customTranslateDB->setValue($customTranslate->getValue());
+        }
         $em->flush();
         try {
             $pusher = $this->container->get('websockets.pusher');
@@ -70,12 +130,47 @@ class SessionDataController extends Controller
     }
 
     /**
+     * @Rest\View()
+     * @Rest\Delete("/translatesmulti")
+     */
+    public function sessionTranslateDeleteMultiAction(Request $request)
+    {
+        $customTranslate = $this->container->get('jms_serializer')->deserialize($request->getContent(), "DataBundle\Entity\CustomTranslate", "json");
+        $em = $this->get('doctrine.orm.entity_manager');
+
+        $langKey = $em->getRepository('DataBundle:CustomTranslateAvailableLangs')->findOneBy(["langKey" => $customTranslate->getLangKey()->getLangKey()]);
+        if(null === $langKey){
+            return $this->get('response')->error(400, "LANG_NOT_FOUND");
+        }
+        $customTranslateDB = $em->getRepository('DataBundle:CustomTranslate')->findOneBy([
+            "keyId" => $customTranslate->getKeyId(),
+            "langKey" => $langKey
+        ]);
+        /* agregar clave dinámicamente */
+        if(null === $customTranslateDB)
+        {
+            return $this->get('response')->error(400, "LANG_KEY_NOT_FOUND");
+        }
+        else{
+            $em->remove($customTranslateDB);
+            $em->flush();
+        }
+        try {
+            $pusher = $this->container->get('websockets.pusher');
+            $pusher->push($this->container->get('jms_serializer')->serialize($customTranslate, "json"), 'api_translations');
+        } catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
+            $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
+        }
+        return $this->get('response')->success("LANG_KEY_DELETE_SUCCESS");
+    }
+
+    /**
      * @Rest\Post("/table/translates")
      */
-    public function clientsConflictReasonsCrudTableAction(Request $request)
+    public function translatesCrudTableAction(Request $request)
     {
         $params = $request->request->all();
-        $tables = $this->container->get("Tables");
+        $tables = $this->container->get("RouteLoader");
         $selectData = "DataBundle:CustomTranslate";
         $mainOrder = array("column" => "id", "dir" => "DESC");
         $data = $tables->generateTableResponse($params, $selectData, $mainOrder);

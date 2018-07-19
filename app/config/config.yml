@@ -7,7 +7,7 @@ imports:
 services:
     websockets.pusher:
         public: true
-        alias: "gos_web_socket.wamp.pusher"
+        alias: "gos_web_socket.zmq.pusher"
     sendlog:
         public: true
         alias: "logger"
@@ -17,6 +17,7 @@ services:
     app.logger:
         alias: logger
         public: true
+
 doctrine_migrations:
     dir_name: "%kernel.root_dir%/DataMigrations"
     namespace: Application\DataMigrations
@@ -73,9 +74,12 @@ gos_web_socket:
             resources:
                 - "@WebSocketsBundle/Resources/config/channels.yml"
     pushers:
-        wamp:
+        zmq:
+            default: true
             port: '%websocket_port%'
             host: '%websocket_host%'
+            persistent: true
+            protocol: tcp
     client:
         session_handler: session.handler.native_file
 framework:

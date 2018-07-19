@@ -15,37 +15,60 @@ class LoginData
     /**
      * @Type("boolean")
      */
-    private $extendedsession = false;
+    private $extendedSession = false;
 
     /**
      * @Type("DataBundle\Entity\User")
      */
     private $user;
 
-    function getCoords() {
+    /**
+     * @return mixed
+     */
+    public function getCoords()
+    {
         return $this->coords;
     }
 
-    function getExtendedsession() {
-        return $this->extendedsession;
-    }
-
-    function getUser(): User {
-        return $this->user;
-    }
-
-    function setCoords($coords) {
+    /**
+     * @param mixed $coords
+     */
+    public function setCoords($coords)
+    {
         $this->coords = $coords;
     }
 
-    function setExtendedSession($extendedsession) {
-        $this->extendedsession = $extendedsession;
+    /**
+     * @return mixed
+     */
+    public function getExtendedSession()
+    {
+        return $this->extendedSession;
     }
 
-    function setUser(User $user) {
+    /**
+     * @param mixed $extendedSession
+     */
+    public function setExtendedSession($extendedSession)
+    {
+        $this->extendedSession = $extendedSession;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * @param mixed $user
+     */
+    public function setUser($user)
+    {
         $this->user = $user;
     }
-
 
 }
 

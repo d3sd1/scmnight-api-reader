@@ -100,7 +100,7 @@ class ConfigController extends Controller {
      */
     public function allConfigsAction(Request $request) {
         $params = $request->request->all();
-        $tables = $this->container->get("Tables");
+        $tables = $this->container->get("RouteLoader");
         $selectData = "DataBundle:Config";
         $mainOrder = array("column" => "config", "dir" => "ASC");
         $data = $tables->generateTableResponse($params, $selectData, $mainOrder);

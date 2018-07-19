@@ -36,6 +36,10 @@ services:
         class: RestBundle\Utils\RestResponse
         arguments: [ "@service_container" ]
         public: true
+    rest.layer:
+        class: RestBundle\Security\RestDaoLayer
+        arguments: [ "@service_container" ]
+        public: true
     mail:
         class: RestBundle\Utils\Mailing
         arguments: [ "@service_container" ]

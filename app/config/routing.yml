@@ -11,6 +11,7 @@ app:
     prefix:   /app/
     defaults: {_format: json} 
 rest:
-    resource: "@RestBundle/Resources/config/routing.yml"
+    resource: '../src/RestBundle/Controller/'
+    type: annotation
     prefix:   /rest/
-    defaults: {_format: json} 
+    defaults: {_format: json}

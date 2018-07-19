@@ -47,7 +47,7 @@ class AuthToken
      *
      * @ORM\Column(name="extended_session", type="boolean")
      */
-    private $extendedsession;
+    private $extendedSession;
 
     /**
      * Get id
@@ -59,14 +59,20 @@ class AuthToken
         return $this->id;
     }
 
-    function getExtendedSession()
+    /**
+     * @return bool
+     */
+    public function isExtendedSession()
     {
-        return $this->extendedsession;
+        return $this->extendedSession;
     }
 
-    function setExtendedSession($extendedsession)
+    /**
+     * @param bool $extendedSession
+     */
+    public function setExtendedSession($extendedSession)
     {
-        $this->extendedsession = $extendedsession;
+        $this->extendedSession = $extendedSession;
     }
 
         /**

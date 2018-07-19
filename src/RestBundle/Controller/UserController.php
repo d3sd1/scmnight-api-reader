@@ -3,186 +3,115 @@
 namespace RestBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use DataBundle\Entity\UserManage;
-use RestBundle\Utils\Random;
+use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * @Rest\Route("/user")
+ */
 class UserController extends Controller
 {
 
-
     /**
-     * @Rest\Get("/entrances")
+     * Get profile info. Needed for session.
+     * @Rest\Get("/info")
      */
-    public function roomUsersWsAction(Request $request)
+    public function getUserinfoAction()
     {
-        $users = $this->get('doctrine.orm.entity_manager')
-            ->getRepository('DataBundle:UserEntrance')
-            ->findAll();
-        return $this->get('response')->success("", $users);
+        $layer = $this->get('rest.layer');
+        $response = $this->get('response');
+        $user = $layer->getSessionUser();
+        if (null === $user) {
+            return $response->error(400, "USER_NOT_FOUND");
+        }
+        return $response->success("", $user);
     }
 
     /**
-     * @Rest\Post("/table/all")
+     * Update actual user profile info.
+     * @Rest\Post("/info")
      */
-    public function allUsersAction(Request $request)
+    public function postUserinfoAction(Request $request)
     {
-        $params = $request->request->all();
-        $tables = $this->container->get("Tables");
-        $selectData = "DataBundle:User";
-        $mainOrder = array("column" => "id", "dir" => "ASC");
-        $data = $tables->generateTableResponse($params, $selectData, $mainOrder);
-        return $this->get('response')->success("", $data);
-    }
+        $layer = $this->get('rest.layer');
+        $response = $this->get('response');
+        $permission = $this->get("permissions");
+        $em = $this->get('doctrine.orm.entity_manager');
 
-    /**
-     * @Rest\Post("/table/room")
-     */
-    public function roomUsersAction(Request $request)
-    {
-        $params = $request->request->all();
-        $tables = $this->container->get("Tables");
-        $selectData = "DataBundle:UserRoom";
-        $mainOrder = array("column" => "date", "dir" => "DESC");
-        $data = $tables->generateTableResponse($params, $selectData, $mainOrder);
-        return $this->get('response')->success("", $data);
-    }
-
-    /**
-     * @Rest\Post("/table/historical")
-     */
-    public function historicalUsersAction(Request $request)
-    {
-        $params = $request->request->all();
-        $tables = $this->container->get("Tables");
-        $selectData = "DataBundle:UserEntrance";
-        $mainOrder = array("column" => "date", "dir" => "DESC");
-        $data = $tables->generateTableResponse($params, $selectData, $mainOrder);
-        return $this->get('response')->success("", $data);
-    }
-
-    /**
-     * @Rest\Put("/add")
-     */
-    public function addusersAction(Request $request)
-    {
-        $user = $this->container->get('jms_serializer')->deserialize($request->getContent(), "DataBundle\Entity\User", "json");
-
-        $em = $this->getDoctrine()->getManager();
-
-        $userOnDb = count($em->getRepository('DataBundle:User')->findBy(array("dni" => $user->getDni()))) > 0;
-
-        if ($userOnDb) {
-            return $this->get('response')->error(500, "USER_ALREADY_ON_DB");
+        /* Check actual user */
+        $user = $layer->getSingleResult('DataBundle:User', array('id' => "_SESSION_USER_INFO"));
+        if (null === $user) {
+            return $response->error(400, "USER_NOT_FOUND");
         }
 
-        $random = new Random();
-        $newPassword = $random->randomAlphaNumeric(rand(8, 30));
-        $this->get('encoder')->setUserPassword($user, $newPassword);
-        $message = (new \Swift_Message())
-            ->setSubject('Bienvenido a SCM')
-            ->setFrom(array('admin@scmnight.com' => $em->getRepository('DataBundle:Config')->loadConfig("disco_name")))
-            ->setTo($user->getEmail())
-            ->setBody($this->renderView('EmailBundle::newuser.html.twig', array('password' => $newPassword)));
-        $this->get('mailer')->send($message);
-        $em->persist($user);
+        /* Check permissions */
+        if (!$permission->hasPermission("MANAGE_PROFILE", $user)) {
+            return $response->error(400, "NO_PERMISSIONS");
+        }
 
-        $userManage = new UserManage();
-        $userManage->setTargetUser($user);
-        $userManage->setUser($this->get('security.token_storage')->getToken()->getUser());
-        $userManage->setType($em->getRepository('DataBundle:UserManageType')->findOneBy(array("name" => "ADD")));
-        $em->persist($userManage);
+        /* Check body */
+        try {
+            $body = $request->getContent();
+        } catch (\Exception $e) {
+            return $response->error(400, "DESERIALIZE_ERROR");
+        }
+        $userInput = $layer->deserialize($body, "DataBundle\Entity\User");
+        if (null === $userInput) {
+            return $response->error(400, "DESERIALIZE_ERROR");
+        }
+
+        /* Validate user password */
+        if (!$layer->validateSessionUserPassword($userInput->getPassword())) {
+            return $this->get('response')->error(400, "PASSWORD_DOESNT_MATCH");
+        }
+
+        /* Set new password */
+        if ($userInput->getNewpass() != null && $userInput->getNewpass() != "") {
+            $this->get('encoder')->setUserPassword($user, $userInput->getNewpass());
+        }
+
+        /* Update on database. Info has not to be pushed with WS since only the actual user will see it. */
+        $user->setEmail($userInput->getEmail());
+        $user->setAddress($userInput->getAddress());
+        $user->setTelephone($userInput->getTelephone());
+        $user->setLangCode($userInput->getLangCode());
+
         $em->flush();
-        try {
-            $pusher = $this->container->get('websockets.pusher');
-            $pusher->push($this->container->get('jms_serializer')->serialize($userManage, "json"), 'api_users_manage');
-        } catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
-            $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
-        }
-
-        return $this->get('response')->success("USER_ADD_SUCCESS", $this->container->get('jms_serializer')->serialize($user, "json"));
+        return $this->get('response')->success("PROFILE_EDIT_SUCCESS");
     }
 
     /**
-     * @Rest\Post("/mod")
+     * Get actual user permissions. Needed for session.
+     * @Rest\Get("/permissions")
      */
-    public function editusersAction(Request $request)
+    public function getUserpermissionsAction()
     {
-        try {
-            $user = $this->container->get('jms_serializer')->deserialize($request->getContent(), "DataBundle\Entity\User", "json");
-            $em = $this->getDoctrine()->getManager();
+        $layer = $this->get('rest.layer');
+        $response = $this->get('response');
+        $permission = $this->get("permissions");
+        $em = $this->get('doctrine.orm.entity_manager');
 
-            $userOnDb = $em->getRepository('DataBundle:User')->findOneBy(array("dni" => $user->getDni()));
-            //TODO: comprobar permiso para editar users
-
-            if (null == $userOnDb || null == $userOnDb->getId()) {
-                return $this->get('response')->error(400, "USER_NOT_FOUND");
-            }
-            $userOnDb->setEmail($user->getEmail());
-            $userOnDb->setFirstname($user->getFirstname());
-            $userOnDb->setLastname($user->getLastname());
-            $userOnDb->setDni($user->getDni());
-            $userOnDb->setTelephone($user->getTelephone());
-            $userOnDb->setAddress($user->getAddress());
-            $em->flush();
-
-            $userManage = new UserManage();
-            $userManage->setTargetUser($userOnDb);
-            $userManage->setUser($this->get('security.token_storage')->getToken()->getUser());
-            $userManage->setType($em->getRepository('DataBundle:UserManageType')->findOneBy(array("name" => "EDIT")));
-            $em->persist($userManage);
-            $em->flush();
-            try {
-                $pusher = $this->container->get('websockets.pusher');
-                $pusher->push($this->container->get('jms_serializer')->serialize($userManage, "json"), 'api_users_manage');
-            } catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
-                $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
-            }
-
-            return $this->get('response')->success("USER_EDIT_SUCCESS");
-        } catch (\Doctrine\ORM\NoResultException $e) {
-            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException();
+        /* Check actual user */
+        $user = $layer->getSingleResult('DataBundle:User', array('id' => "_SESSION_USER_INFO"));
+        if (null === $user) {
+            return $response->error(400, "USER_NOT_FOUND");
         }
-    }
 
-    /**
-     * @Rest\Delete("/delete/{dni}")
-     */
-    public function removeusersAction(Request $request)
-    {
-        try {
-            $em = $this->getDoctrine()->getManager();
-
-            $actualUser = $this->get('security.token_storage')->getToken()->getUser();
-            $delUser = $em->getRepository('DataBundle:User')
-                ->createQueryBuilder("u")
-                ->select('*')
-                ->select('u')
-                ->where('u.dni = :dni')
-                ->setParameter('dni', $request->get('dni'))
-                ->getQuery()
-                ->getSingleResult();
-            //TODO: comprobar permiso para borrar users
-            $userManage = new UserManage();
-            $userManage->setTargetUser($delUser);
-            $userManage->setUser($this->get('security.token_storage')->getToken()->getUser());
-            $userManage->setType($em->getRepository('DataBundle:UserManageType')->findOneBy(array("name" => "DELETE")));
-            $em->persist($userManage);
-            $em->flush();
-            try {
-                $pusher = $this->container->get('websockets.pusher');
-                $pusher->push($this->container->get('jms_serializer')->serialize($userManage, "json"), 'api_users_manage');
-            } catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
-                $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
-            }
-            $em->remove($delUser);
-            $em->flush();
-            return $this->get('response')->success("USER_DEL_SUCCESS");
-        } catch (\Doctrine\ORM\NoResultException $e) {
-            return $this->get('response')->error(400, "USER_NOT_FOUND");
+        $layer = $this->get('rest.layer');
+        $response = $this->get('response');
+        $permissions = $layer->getComplexResult(
+            $em->getRepository('DataBundle:UserPermissions')
+                ->createQueryBuilder("up")
+                ->select("p")
+                ->where("up.user = :user")
+                ->join("DataBundle:Permission", "p")
+                ->andWhere("p.id = up.permission")
+                ->setParameter("user", $layer->getSessionUser())
+        );
+        if (null === $permissions) {
+            return $response->error(400, "SESSION_USER_HAS_NO_PERMISSIONS");
         }
+        return $response->success("", $permissions);
     }
 
 }

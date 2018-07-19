@@ -57,7 +57,16 @@ class Version20180406111451 extends AbstractMigration
                       ("DISPUTES","Altercados","Disputes"), ("TOO_DRUNKED","Estado de embriaguez","Too drunked"), ("DRUGS_CONSUME","Consumo de drogas","Drugs consuming"), ("AGGRESSIONS","Agresiones","Aggressions")');
         $this->addSql('insert  into `nationalities`(`name`) values ("ES")');
         $this->addSql('insert  into `permissions_list`(`list_key_name`) values ("RESPONSABLE"),("SECURITY"),("WAITER"),("MARKETING"),("RRPP_BOSS"),("RRPP"),("SCM")');
-        $this->addSql('insert  into `custom_translate_available_langs`(`lang_key`) values ("es"),("en")');
+        $this->addSql('insert  into `custom_translate_available_langs`(id,`lang_key`) values (1,"es"),(2,"en")');
+        $this->addSql("insert  into `custom_translate`(`id`,`key`,`value`,`lang_key_id`) values
+                        (1,'CONFLICT.DISPUTES','Disputas',1),
+                        (2,'CONFLICT.DISPUTES','Disputes',2),
+                        (3,'CONFLICT.AGGRESSIONS','Agresiones',1),
+                        (4,'CONFLICT.AGGRESSIONS','Agressions',2),
+                        (5,'CONFLICT.DRUGS_CONSUMING','Consumo de drogas',1),
+                        (6,'CONFLICT.DRUGS_CONSUMING','Drugs consuming',2),
+                        (7,'CONFLICT.TOO_DRUNKED','Consumo excesivo de alcohol',1),
+                        (8,'CONFLICT.TOO_DRUNKED','Too drunked',2);");
         $this->addSql("insert  into `permissions`(`action`) values 
                             ('VIEW_DASHBOARD'),
                             ('MANAGE_PROFILE'),
