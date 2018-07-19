@@ -58,15 +58,17 @@ class Version20180406111451 extends AbstractMigration
         $this->addSql('insert  into `nationalities`(`name`) values ("ES")');
         $this->addSql('insert  into `permissions_list`(`list_key_name`) values ("RESPONSABLE"),("SECURITY"),("WAITER"),("MARKETING"),("RRPP_BOSS"),("RRPP"),("SCM")');
         $this->addSql('insert  into `custom_translate_available_langs`(id,`lang_key`) values (1,"es"),(2,"en")');
-        $this->addSql("insert  into `custom_translate`(`id`,`key`,`value`,`lang_key_id`) values
-                        (1,'CONFLICT.DISPUTES','Disputas',1),
-                        (2,'CONFLICT.DISPUTES','Disputes',2),
-                        (3,'CONFLICT.AGGRESSIONS','Agresiones',1),
-                        (4,'CONFLICT.AGGRESSIONS','Agressions',2),
-                        (5,'CONFLICT.DRUGS_CONSUMING','Consumo de drogas',1),
-                        (6,'CONFLICT.DRUGS_CONSUMING','Drugs consuming',2),
-                        (7,'CONFLICT.TOO_DRUNKED','Consumo excesivo de alcohol',1),
-                        (8,'CONFLICT.TOO_DRUNKED','Too drunked',2);");
+        $this->addSql("INSERT  INTO `custom_translate`(`key_id`,`value`,`lang_key_id`) VALUES
+                        ('CONFLICT.DISPUTES','Disputas',1),
+                        ('CONFLICT.DISPUTES','Disputes',2),
+                        ('CONFLICT.AGGRESSIONS','Agresiones',1),
+                        ('CONFLICT.AGGRESSIONS','Agressions',2),
+                        ('CONFLICT.DRUGS_CONSUMING','Consumo de drogas',1),
+                        ('CONFLICT.DRUGS_CONSUMING','Drugs consuming',2),
+                        ('CONFLICT.TOO_DRUNKED','Consumo excesivo de alcohol',1),
+                        ('EMAIL.RECOVERPASS.TITLE','Recupera tu contraseña',2),
+                        ('EMAIL.RECOVERPASS.CONTENT','Para proceder a recuperar tu cuenta, ingresa el código:',2)
+                        ");
         $this->addSql("insert  into `permissions`(`action`) values 
                             ('VIEW_DASHBOARD'),
                             ('MANAGE_PROFILE'),
@@ -93,6 +95,7 @@ class Version20180406111451 extends AbstractMigration
                             ('MANAGE_PERMISSIONS'),
                             ('MANAGE_TRANSLATES'),
                             ('MANAGE_STOCK_TYPES'),
+                            ('RECOVER_PASSWORD'),
                             ('LOGOUT');");
     }
 

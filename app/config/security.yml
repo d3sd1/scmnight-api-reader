@@ -11,7 +11,7 @@ security:
             security: false
 
         rest:
-            pattern: ^/(?!rest/auth|app)
+            pattern: ^/(?!rest/auth/login|rest/auth/recover|rest/auth/recover/code|app)
             stateless: true
             simple_preauth:
                 authenticator: auth_token_authenticator

@@ -39,7 +39,7 @@ class UserController extends Controller
         $em = $this->get('doctrine.orm.entity_manager');
 
         /* Check actual user */
-        $user = $layer->getSingleResult('DataBundle:User', array('id' => "_SESSION_USER_INFO"));
+        $user = $layer->getSessionUser();
         if (null === $user) {
             return $response->error(400, "USER_NOT_FOUND");
         }

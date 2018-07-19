@@ -30,12 +30,4 @@ class RestResponse
         $response->setContent($this->container->get('jms_serializer')->serialize(array("message" => $message != null ? $message : "", "data" => $data != null ? $data : ""), "json"));
         return $response;
     }
-
-    function informative($message = null, $data = null)
-    {
-        $response = new JsonResponse();
-        $response->setStatusCode(100);
-        $response->setContent($this->container->get('jms_serializer')->serialize(array("message" => $message != null ? $message : "", "data" => $data != null ? $data : ""), "json"));
-        return $response;
-    }
 }

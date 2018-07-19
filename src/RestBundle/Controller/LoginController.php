@@ -2,6 +2,8 @@
 
 namespace RestBundle\Controller;
 
+use DataBundle\Entity\UserRecover;
+use RestBundle\Utils\Random;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -15,13 +17,13 @@ class LoginController extends Controller
 {
 
     /**
+     * Login user into system.
      * @Rest\Post("/login")
      */
     public function postAuthTokensAction(Request $request)
     {
         $layer = $this->get('rest.layer');
         $response = $this->get('response');
-        $permission = $this->get("permissions");
         $em = $this->get('doctrine.orm.entity_manager');
 
         /* Check body */
@@ -64,68 +66,70 @@ class LoginController extends Controller
         $authToken->setUser($userDB);
 
         /* Push logout to users */
-        try {
-            $usersToLogout = $em->getRepository('RestBundle:AuthToken')
+        $usersToLogout = $layer->getComplexResult(
+            $em->getRepository('RestBundle:AuthToken')
                 ->createQueryBuilder("at")
                 ->select('at.value as token')
                 ->where('at.user = :user')
                 ->andWhere('at.createdDate > :cdate')
-                ->setParameter("user", $user)
+                ->setParameter("user", $userDB)
                 ->setParameter("cdate", (new \DateTime())->modify('-1 day'))
-                ->getQuery()
-                ->getResult();
-            $pusher = $this->container->get('websockets.pusher');
-            $pusher->push(['logoutUsers' => $usersToLogout], 'auth_guard');
-        } catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
-            $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
-        }
+        );
+        $layer->wsPush(['logoutUsers' => $usersToLogout], 'auth_guard');
 
         /* Delete old auth tokens */
-        $em->getRepository('RestBundle:AuthToken')
-            ->createQueryBuilder('at')
-            ->delete()
-            ->where('at.user = :user')
-            ->andWhere('at.createdDate < :cdate')
-            ->setParameter("user", $user)
-            ->setParameter("cdate", (new \DateTime())->modify('-1 day'))
-            ->getQuery()
-            ->getResult();
+        $layer->getComplexResult(
+            $em->getRepository('RestBundle:AuthToken')
+                ->createQueryBuilder('at')
+                ->delete()
+                ->where('at.user = :user')
+                ->andWhere('at.createdDate < :cdate')
+                ->setParameter("user", $userDB)
+                ->setParameter("cdate", (new \DateTime())->modify('-1 day'))
+        );
 
         /* Delete account recover codes */
-        $em->getRepository('DataBundle:UserRecover')
-            ->createQueryBuilder('ur')
-            ->delete()
-            ->where('ur.user = :user')
-            ->setParameter("user", $user)
-            ->getQuery()
-            ->getResult();
+        $layer->getComplexResult(
+            $em->getRepository('DataBundle:UserRecover')
+                ->createQueryBuilder('ur')
+                ->delete()
+                ->where('ur.user = :user')
+                ->setParameter("user", $userDB)
+        );
 
         /* Insert token */
         $em->persist($authToken);
 
         /* Insert log */
+        $lat = array_key_exists("lat", $userInput->getCoords()) ? $userInput->getCoords()["lat"] : "0";
+        $lng = array_key_exists("lat", $userInput->getCoords()) ? $userInput->getCoords()["lng"] : "0";
         $loginLog = new UserLogin();
-        $loginLog->setUser($user);
-        $coords = $request->request->get("coords");
-        if (null !== $coords && null != $coords["lat"] && null != $coords["lng"]) {
-            $loginLog->setLat($coords["lat"]);
-            $loginLog->setLng($coords["lng"]);
-        }
+        $loginLog->setUser($userDB);
+        $loginLog->setLat($lat);
+        $loginLog->setLng($lng);
         $em->persist($loginLog);
         $em->flush();
         return $this->get('response')->success("LOGIN_SUCCESS", $authToken);
     }
 
     /**
+     * Logout user from system.
      * @Rest\Delete("/logout/{id}")
      */
     public function removeAuthTokenAction(Request $request)
     {
+        $layer = $this->get('rest.layer');
+        $response = $this->get('response');
         $em = $this->get('doctrine.orm.entity_manager');
-        $authToken = $em->getRepository('RestBundle:AuthToken')->find($request->get('id'));
-        $connectedUser = $this->get('security.token_storage')->getToken()->getUser();
 
-        if ($authToken && $authToken->getUser()->getId() === $connectedUser->getId()) {
+        /* Check actual user */
+        $user = $layer->getSingleResult('DataBundle:User', array('id' => "_SESSION_USER_INFO"));
+        if (null === $user) {
+            return $response->error(400, "USER_NOT_FOUND");
+        }
+
+        $authToken = $layer->getSingleResult('RestBundle:AuthToken', array('id' => $request->get('id')));
+        if ($authToken && $authToken->getUser()->getId() === $layer->getSessionUser()->getId()) {
             $this->get('security.token_storage')->setToken(null);
             $em->remove($authToken);
             $em->flush();
@@ -137,51 +141,97 @@ class LoginController extends Controller
 
 
     /**
+     * Recover password step 1: send code
      * @Rest\Post("/recover")
      */
     public function recoverAccountAction(Request $request)
     {
-        $dni = $request->request->get("dni");
-        if ($dni == null || $dni == "") {
-            return $this->get('response')->error(400, "NO_USER_PROVIDED");
-        }
+
+        $layer = $this->get('rest.layer');
+        $response = $this->get('response');
+        $permission = $this->get("permissions");
         $em = $this->get('doctrine.orm.entity_manager');
-        $user = $em->getRepository('DataBundle:User')->findOneByDni($dni);
 
 
-        if ($user !== null) {
-            if ($this->get("permissions")->hasPermission("UNRECOVERABLE_USER", $user)) {
-                return $this->get('response')->error(416, "USER_PERMISSIONS_INMUTABLE");
-            }
-            /* Generar código aleatorio */
-            $random = new Random();
-            $recoverCode = $random->randomAlphaNumeric(20);
+        /* Check body */
+        try {
+            $body = $request->getContent();
+        } catch (\Exception $e) {
+            return $response->error(400, "DESERIALIZE_ERROR");
+        }
+        $userInput = $layer->deserialize($body, "DataBundle\Entity\User");
+        if (null === $userInput) {
+            return $response->error(400, "DESERIALIZE_ERROR");
+        }
 
-            /* Delete account recover codes */
+        /* Check user */
+        $user = $layer->getSingleResult('DataBundle:User', array('dni' => $userInput->getDni()));
+        if (null === $user) {
+            return $response->error(400, "USER_NOT_FOUND");
+        }
+
+        /* Check permissions */
+        if (!$permission->hasPermission("RECOVER_PASSWORD", $user)) {
+            return $response->error(400, "RECOVER_NO_PERMISSIONS");
+        }
+
+        /* Check there are no petitions on last 30 mins */
+        $prevPetition = $layer->getComplexResult(
+            $em->getRepository('DataBundle:UserRecover')
+                ->createQueryBuilder('ur')
+                ->where('ur.user = :user')
+                ->setMaxResults(1)
+                ->orderBy('ur.dateExpires', 'DESC')
+                ->setParameter("user", $user)
+        )[0];
+        if(null !== $prevPetition && !($prevPetition->getDateExpires() < (new \DateTime()))) {
+            return $response->error(400, "RECOVER_WAIT_FOR_RESEND");
+        }
+
+        /* Generar código aleatorio */
+        $random = new Random();
+        $recoverCode = $random->randomAlphaNumeric(20);
+
+        /* Delete account recover codes */
+        $layer->getComplexResult(
             $em->getRepository('DataBundle:UserRecover')
                 ->createQueryBuilder('ur')
                 ->delete()
                 ->where('ur.user = :user')
                 ->setParameter("user", $user)
-                ->getQuery()
-                ->getResult();
+        );
 
-            /* Insertar código con fecha de expiración a la base de datos */
-            $secondsToExpire = $em->getRepository('DataBundle:Config')->findOneBy(array("config" => "recover_code_seconds_expire"))->getValue();
-            $expireDate = (new \DateTime("now"))->modify('+' . $secondsToExpire . ' seconds');
-            $code = new UserRecover();
-            $code->setCode($recoverCode);
-            $code->setDateExpires($expireDate);
-            $code->setUser($user);
-            $em->persist($code);
-            $em->flush();
-            $this->get('mail')->send($user->getEmail(), "Recuperación de cuenta", "recover_account", array('code' => $recoverCode));
+        /* Insertar código con fecha de expiración a la base de datos */
+        $configSecondsToExpire = $layer->getSingleResult('DataBundle:Config', array("config" => "recover_code_seconds_expire"));
+        if(null === $configSecondsToExpire) {
+            return $response->error(400, "SERVER_NOT_CONFIGURED");
         }
+        $secondsToExpire = $configSecondsToExpire->getValue();
+        $expireDate = (new \DateTime("now"))->modify('+' . $secondsToExpire . ' seconds');
 
-        return $this->get('response')->informative("RECOVER_EMAIL_SENT");
+        $code = new UserRecover();
+        $code->setCode($recoverCode);
+        $code->setDateExpires($expireDate);
+        $code->setUser($user);
+        $em->persist($code);
+        $em->flush();
+
+
+        /* Enviar correo de recuperación a la cuenta, en el idioma del usuario */
+        $extraData = array();
+        $extraData["code"] = $recoverCode;
+        $extraData["text_recover_pass_title"] = $layer->getTranslate("EMAIL.RECOVERPASS.TITLE",$user->getLangCode());
+        $extraData["text_recover_pass_content"] = $layer->getTranslate("EMAIL.RECOVERPASS.CONTENT",$user->getLangCode());
+        $extraData["copyright_powered"] = $layer->getTranslate("EMAIL.POWEREDBY",$user->getLangCode());
+        $this->get('mail')->send($user->getEmail(), "Recuperación de cuenta", "recover_account", $extraData, $extraData["text_recover_pass_content"] . " " .$recoverCode);
+
+
+        return $this->get('response')->success("RECOVER_EMAIL_SENT");
     }
 
+    //TODO: formatear esta funcion de abajo al modelo seguro.
     /**
+     * Recover password step 2: use code
      * @Rest\Post("/recover/code")
      */
     public function recoverAccountCodeAction(Request $request)

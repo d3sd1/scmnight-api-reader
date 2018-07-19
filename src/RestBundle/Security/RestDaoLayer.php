@@ -58,7 +58,7 @@ class RestDaoLayer
         if (!$encoder->isPasswordValid($sessionUser->getPassword(), $plainPassword, $sessionUser->getSalt())) {
             return false;
         }
-        return $this->validateUserPassword($sessionUser,$plainPassword);
+        return $this->validateUserPassword($sessionUser, $plainPassword);
     }
 
     public function validateUserPassword($userOnDb, $plainPassword)
@@ -86,7 +86,7 @@ class RestDaoLayer
         return $deserialize;
     }
 
-    public function serialize($body, $entity)
+    public function serialize($body)
     {
         try {
             /** @var $entity $object */
@@ -107,7 +107,6 @@ class RestDaoLayer
             $data = $this->container->get('doctrine.orm.entity_manager')
                 ->getRepository($entity)
                 ->findOneBy($this->depureConstants($by));
-
         } catch (\Exception $e) {
             $data = null;
             $this->container->get('sendlog')->warning('GET SINGLE RESULT QUERY FAILED: ' . $e->getMessage());
@@ -141,12 +140,23 @@ class RestDaoLayer
         return $data;
     }
 
-    public function wsPush($data, $channel) {
+    public function wsPush($data, $channel)
+    {
         try {
             $pusher = $this->container->get('websockets.pusher');
             $pusher->push($this->serialize($data), $channel);
         } catch (\Exception $e) {
             $this->container->get('sendlog')->warning('WS SERVER OFFLINE: ' . $e->getMessage());
         }
+    }
+
+    public function getTranslate($keyId, $langKey)
+    {
+        $translate = $this->getSingleResult('DataBundle:CustomTranslate', [
+            'keyId' => $keyId,
+            'langKey' => $this->getSingleResult('DataBundle:CustomTranslateAvailableLangs', ['langKey' => $langKey])->getId()
+        ]);
+
+        return null !== $translate ? $translate->getValue() : "";
     }
 }
