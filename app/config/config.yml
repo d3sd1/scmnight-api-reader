@@ -76,7 +76,7 @@ gos_web_socket:
     pushers:
         zmq:
             default: true
-            port: '%websocket_port%'
+            port: '%websocket_zmq_port%'
             host: '%websocket_host%'
             persistent: true
             protocol: tcp

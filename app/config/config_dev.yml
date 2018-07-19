@@ -16,6 +16,7 @@ parameters:
     cors_allow_origin: '*'
     jwt_key_pass_phrase: g6GfdDs2453Ax
     websocket_host: 127.0.0.1
+    websocket_zmq_port: 50005
     websocket_port: 50002
     
 framework:

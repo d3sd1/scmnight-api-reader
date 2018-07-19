@@ -81,8 +81,24 @@ class RestDaoLayer
             }
         } catch (\Exception $e) {
             $deserialize = null;
+            $this->container->get('sendlog')->warning('DESERIALIZE FAILED: ' . $e->getMessage());
         }
         return $deserialize;
+    }
+
+    public function serialize($body, $entity)
+    {
+        try {
+            /** @var $entity $object */
+            $serialize = $this->container->get('jms_serializer')->serialize($body, "json");
+            if ($body === null || $body == "") {
+                $serialize = null;
+            }
+        } catch (\Exception $e) {
+            $serialize = null;
+            $this->container->get('sendlog')->warning('SERIALIZE FAILED: ' . $e->getMessage());
+        }
+        return $serialize;
     }
 
     public function getSingleResult($entity, $by)
@@ -94,6 +110,7 @@ class RestDaoLayer
 
         } catch (\Exception $e) {
             $data = null;
+            $this->container->get('sendlog')->warning('GET SINGLE RESULT QUERY FAILED: ' . $e->getMessage());
         }
         return $data;
     }
@@ -107,6 +124,7 @@ class RestDaoLayer
 
         } catch (\Exception $e) {
             $data = null;
+            $this->container->get('sendlog')->warning('GET ALL RESULTS QUERY FAILED: ' . $e->getMessage());
         }
         return $data;
     }
@@ -118,16 +136,17 @@ class RestDaoLayer
 
         } catch (\Exception $e) {
             $data = null;
+            $this->container->get('sendlog')->warning('GET COMPLEX RESULT QUERY FAILED: ' . $e->getMessage());
         }
         return $data;
     }
 
-    public function wsPush() {
+    public function wsPush($data, $channel) {
         try {
             $pusher = $this->container->get('websockets.pusher');
-            $pusher->push($this->container->get('jms_serializer')->serialize($conflictReasonManage, "json"), 'api_conflictreasons');
-        } catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
-            $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
+            $pusher->push($this->serialize($data), $channel);
+        } catch (\Exception $e) {
+            $this->container->get('sendlog')->warning('WS SERVER OFFLINE: ' . $e->getMessage());
         }
     }
 }
