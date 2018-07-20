@@ -9,44 +9,57 @@ use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use DataBundle\Entity\ConfigManage;
 
-class ConfigController extends Controller {
+/**
+ * @Rest\Route("/config")
+ */
+class ConfigController extends Controller
+{
     /**
      * @Rest\Post("/logo")
      */
-    public function postLogoAction(Request $request) {
-        /*
-        Check if user sent good data
-        */
-        try{
-            $body = json_decode($request->getContent(),true);
-        }
-        catch(\Exception $e)
-        {
-            return $this->get('response')->error(400, "INVALID_LOGO_IMAGE");
-        }
-        if(!array_key_exists('img',$body))
-        {
-            return $this->get('response')->error(400, "INVALID_LOGO_IMAGE");
+    public function postLogoAction(Request $request)
+    {
+        $layer = $this->get('rest.layer');
+        $response = $this->get('response');
+        $permission = $this->get("permissions");
+        $em = $this->get('doctrine.orm.entity_manager');
+
+        /* Check actual user */
+        $user = $layer->getSessionUser();
+        if (null === $user) {
+            return $response->error(400, "USER_NOT_FOUND");
         }
 
-        $img = $body['img'];
-        /* Validar imagen en B64 y, de paso, obtener su info */
-        try{
-            $imgMetadata = getimagesize($img);
-            $imgBSize = (int) (strlen(rtrim($img, '=')) * 3 / 4);
-            $imgKbSize    = $imgBSize / 1024;
-            $imgMbSize    = $imgKbSize / 1024;
+        /* Check permissions */
+        if (!$permission->hasPermission("CHANGE_LOGO", $user)) {
+            return $response->error(400, "NO_PERMISSIONS");
         }
-        catch(\Exception $e)
-        {
+
+        /* Check body */
+        try {
+            $body = json_decode($request->getContent(), true);
+        } catch (\Exception $e) {
+            return $this->get('response')->error(400, "INVALID_LOGO_IMAGE");
+        }
+        if (!array_key_exists('img', $body)) {
+            return $this->get('response')->error(400, "INVALID_LOGO_IMAGE");
+        }
+        $img = $body['img'];
+
+        /* Validar imagen en B64 y, de paso, obtener su info */
+        try {
+            $imgMetadata = getimagesize($img);
+            $imgBSize = (int)(strlen(rtrim($img, '=')) * 3 / 4);
+            $imgKbSize = $imgBSize / 1024;
+            $imgMbSize = $imgKbSize / 1024;
+        } catch (\Exception $e) {
             return $this->get('response')->error(400, "INVALID_LOGO_IMAGE");
         }
 
         /*
          * Check image MB size. Max allowed: 10.
          */
-        if($imgMbSize > 10)
-        {
+        if ($imgMbSize > 10) {
             return $this->get('response')->error(400, "INVALID_LOGO_MBSIZEIMAGE");
         }
         /*
@@ -62,25 +75,21 @@ class ConfigController extends Controller {
             "image/x-citrix-jpeg",
             "image/pjpeg"
         );
-        if(!in_array($myme, $validMymes))
-        {
+        if (!in_array($myme, $validMymes)) {
             return $this->get('response')->error(400, "INVALID_LOGO_FORMATIMAGE");
         }
-        $em = $this->get('doctrine.orm.entity_manager');
-        $logo = $em->getRepository('DataBundle:ExtraConfig')->findOneBy(["config" => "base64_logo"]);
-        try{
+
+        $logo = $layer->getSingleResult('DataBundle:ExtraConfig', [
+            "config" => "base64_logo"
+        ]);
+        try {
             $logo->setValue($img);
             $em->flush();
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
             return $this->get('response')->error(400, "INVALID_LOGO_MBSIZEIMAGE");
         }
-        try {
-            $pusher = $this->container->get('websockets.pusher');
-            $pusher->push($img, 'api_logo');
-        } catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
-            $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
-        }
+        $layer->wsPush($img, 'api_logo');
+
         return $this->get('response')->success("LOGO_IMAGE_CHANGED");
     }
 
@@ -89,18 +98,20 @@ class ConfigController extends Controller {
      */
     public function findConfigAction(Request $request)
     {
-        $config = $this->get('doctrine.orm.entity_manager')
-            ->getRepository('DataBundle:Config')
-            ->findOneBy(["config" => $request->get("name")]);
+        $layer = $this->get('rest.layer');
+        $config = $layer->getSingleResult('DataBundle:Config', [
+            "config" => $request->get("name")
+        ]);
         return $this->get('response')->success("", $config);
     }
 
     /**
-     * @Rest\Post("/table/all")
+     * @Rest\Post("/table")
      */
-    public function allConfigsAction(Request $request) {
+    public function allConfigsAction(Request $request)
+    {
         $params = $request->request->all();
-        $tables = $this->container->get("RouteLoader");
+        $tables = $this->container->get("Tables");
         $selectData = "DataBundle:Config";
         $mainOrder = array("column" => "config", "dir" => "ASC");
         $data = $tables->generateTableResponse($params, $selectData, $mainOrder);
@@ -110,27 +121,61 @@ class ConfigController extends Controller {
     /**
      * @Rest\Post("/mod")
      */
-    public function editConfigAction(Request $request) {
-        $conf = $this->container->get('jms_serializer')->deserialize($request->getContent(), "DataBundle\Entity\Config", "json");
-        $em = $this->getDoctrine()->getManager();
-        $confDB = $em->getRepository('DataBundle:Config')->findOneBy(array("config" => $conf->getConfig()));
+    public function editConfigAction(Request $request)
+    {
+
+        $layer = $this->get('rest.layer');
+        $response = $this->get('response');
+        $permission = $this->get("permissions");
+        $em = $this->get('doctrine.orm.entity_manager');
+
+        /* Check actual user */
+        $user = $layer->getSessionUser();
+        if (null === $user) {
+            return $response->error(400, "USER_NOT_FOUND");
+        }
+
+        /* Check permissions */
+        if (!$permission->hasPermission("MANAGE_CONFIG", $user)) {
+            return $response->error(400, "NO_PERMISSIONS");
+        }
+
+        /* Check body */
+        try {
+            $body = $request->getContent();
+        } catch (\Exception $e) {
+            return $response->error(400, "DESERIALIZE_ERROR");
+        }
+        $configInput = $layer->deserialize($body, "DataBundle\Entity\Config");
+        if (null === $configInput) {
+            return $response->error(400, "DESERIALIZE_ERROR");
+        }
+
+        $confDB = $layer->getSingleResult('DataBundle:Config', [
+            "config" => $configInput->getConfig()
+        ]);
+
         if (null === $confDB) {
             return $this->get('response')->error(400, "NO_CONFIG_FOUND");
         }
-        $dataType = $em->getRepository('DataBundle:ConfigType')->findOneBy(array("id" => $confDB->getDataType()));
+        $dataType = $layer->getSingleResult('DataBundle:ConfigType', [
+            "type" => $confDB->getDataType()->getType()
+        ]);
         switch ($dataType->getType()) {
             case "boolean":
-                $newValue = boolval($conf->getValue());
+                $newValue = boolval($configInput->getValue());
                 break;
             case "double":
-                $newValue = floatval($conf->getValue());
+                $newValue = floatval($configInput->getValue());
                 break;
             case "int":
-                $newValue = intval($conf->getValue());
+                $newValue = intval($configInput->getValue());
                 break;
             case "string":
-                $newValue = $conf->getValue();
+                $newValue = $configInput->getValue();
                 break;
+            default:
+                $newValue = $configInput->getValue();
         }
         $confDB->setValue($newValue);
         $configLog = new ConfigManage();
@@ -138,12 +183,7 @@ class ConfigController extends Controller {
         $configLog->setUser($this->get('security.token_storage')->getToken()->getUser());
         $em->persist($configLog);
         $em->flush();
-        try {
-            $pusher = $this->container->get('websockets.pusher');
-            $pusher->push($this->container->get('jms_serializer')->serialize($configLog, "json"), 'api_config_manage');
-        } catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
-            $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
-        }
+        $layer->wsPush($configLog, 'api_config_manage');
 
         return $this->get('response')->success("CONFIG_UPDATED", $confDB);
     }

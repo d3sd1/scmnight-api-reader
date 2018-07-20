@@ -14,7 +14,7 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 /**
  * @Rest\Route("/session")
  */
-class SessionDataController extends Controller
+class SessionController extends Controller
 {
     /**
      * Get disco basic information
@@ -37,7 +37,7 @@ class SessionDataController extends Controller
     /**
      * Get all translations for given lang.
      * @Rest\View()
-     * @Rest\Get("/translates/{langKey}")
+     * @Rest\Get("/translations/{langKey}")
      */
     public function sessionTranslateSingleAction(Request $request)
     {
@@ -99,7 +99,7 @@ class SessionDataController extends Controller
         }
         $customTranslateDB = $layer->getSingleResult('DataBundle:CustomTranslate', [
             "keyId" => $translateInput->getKeyId(),
-            "langKey" => $langKey
+            "langKey" => $langKey->getId()
         ]);
 
         /* Agregar clave dinámicamente, o actualizarla. */
@@ -236,9 +236,9 @@ class SessionDataController extends Controller
     public function translatesCrudTableAction(Request $request)
     {
         $params = $request->request->all();
-        $tables = $this->container->get("RouteLoader");
+        $tables = $this->container->get("Tables");
         $selectData = "DataBundle:CustomTranslate";
-        $mainOrder = array("column" => "id", "dir" => "DESC");
+        $mainOrder = array("column" => "keyId", "dir" => "ASC");
         $data = $tables->generateTableResponse($params, $selectData, $mainOrder);
         return $this->get('response')->success("", $data);
     }
@@ -258,7 +258,7 @@ class SessionDataController extends Controller
     /**
      * Get default translate.
      * @Rest\View()
-     * @Rest\Get("/translatedefault")
+     * @Rest\Get("/translate/default")
      */
     public function sessionTranslateDefaultAction(Request $request)
     {

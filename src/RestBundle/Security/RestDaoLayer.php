@@ -114,6 +114,19 @@ class RestDaoLayer
         return $data;
     }
 
+    public function getMultiResults($entity, $by)
+    {
+        try {
+            $data = $this->container->get('doctrine.orm.entity_manager')
+                ->getRepository($entity)
+                ->findBy($this->depureConstants($by));
+        } catch (\Exception $e) {
+            $data = null;
+            $this->container->get('sendlog')->warning('GET SINGLE RESULT QUERY FAILED: ' . $e->getMessage());
+        }
+        return $data;
+    }
+
     public function getAllResults($entity)
     {
         try {
