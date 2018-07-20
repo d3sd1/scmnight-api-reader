@@ -65,6 +65,7 @@ gos_web_socket:
         - "@sockets.rates.manage"
         - "@sockets.config.logo"
         - "@sockets.translations"
+        - "@sockets.permissionslist.manage"
     shared_config: false
     server:
         port: '%websocket_port%'

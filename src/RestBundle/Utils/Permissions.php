@@ -21,7 +21,7 @@ class Permissions
         }
         foreach($userPermissions as $userPermission)
         {
-            if($userPermission->getPermission()->getAction() === $permission)
+            if(null !== $userPermission->getPermission() && $userPermission->getPermission()->getAction() === $permission)
             {
                 return true;
             }

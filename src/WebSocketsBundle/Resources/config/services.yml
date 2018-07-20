@@ -25,7 +25,9 @@ services:
         class: WebSocketsBundle\Topic\LogoConfigTopic
     sockets.translations:
         class: WebSocketsBundle\Topic\TranslationsTopic
-        
+    sockets.permissionslist.manage:
+        class: WebSocketsBundle\Topic\PermissionsListTopic
+
     gos_web_socket_server.client_event.listener:
         class: WebSocketsBundle\EventListener\ConnectionListener
         tags:

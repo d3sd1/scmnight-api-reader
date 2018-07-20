@@ -14,7 +14,6 @@ class Permission {
 
     /**
      * @ORM\Id
-     * @Exclude
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
      */

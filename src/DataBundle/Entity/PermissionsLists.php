@@ -16,14 +16,14 @@ class PermissionsLists
     /**
      * @ORM\Id
      * @ORM\ManyToOne(targetEntity="DataBundle\Entity\Permission")
-     * @ORM\JoinColumn(name="gender", referencedColumnName="id")
+     * @ORM\JoinColumn(referencedColumnName="id",onDelete="CASCADE")
      */
     private $idPermission;
 
     /**
      * @ORM\Id
      * @ORM\ManyToOne(targetEntity="DataBundle\Entity\PermissionList")
-     * @ORM\JoinColumn(name="gender", referencedColumnName="id")
+     * @ORM\JoinColumn(referencedColumnName="id",onDelete="CASCADE")
      */
     private $idList;
 

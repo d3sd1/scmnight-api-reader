@@ -171,7 +171,7 @@ class SessionController extends Controller
             $layer->wsPush($translateInput, "api_translations");
         }
         $em->flush();
-        return $this->get('response')->success("", $allTranslatesInput);
+        return $this->get('response')->success("LANG_KEY_UPDATED", $allTranslatesInput);
     }
 
     /**

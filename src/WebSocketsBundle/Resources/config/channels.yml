@@ -50,3 +50,7 @@ auth_guard:
     channel: scm/auth
     handler:
         callback: 'auth.topic'
+api_manage_permissions:
+    channel: scm/permissions_manage
+    handler:
+        callback: 'permissionslist.manage.topic'
