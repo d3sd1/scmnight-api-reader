@@ -59,14 +59,66 @@ class Version20180406111451 extends AbstractMigration
         $this->addSql('insert  into `clients_ban_type`(`name`) values 
                       ("DISPUTES"), ("TOO_DRUNKED"), ("DRUGS_CONSUME"), ("AGGRESSIONS")');
         $this->addSql('insert  into `nationalities`(`name`) values ("ES")');
-        $this->addSql('insert  into `permissions_list`(`list_key_name`) values ("RESPONSABLE"),("SECURITY"),("WAITER"),("MARKETING"),("RRPP_BOSS"),("RRPP")');
+        $this->addSql('insert  into `permissions_list`(id,`list_key_name`) values (1,"BOSS"),(6,"SECURITY"),(3,"WAITER"),(4,"MARKETING"),(5,"RRPP_BOSS"),(2,"RRPP")');
         $this->addSql('insert  into `custom_translate_available_langs`(id,`lang_key`) values (1,"es"),(2,"en")');
+        /* LISTAS DE PERMISOS PARA PERMISOS - GRUPOS DE PERMISOS. AL JEFE LE METEMOS T0DOS
+
+        TODO
+        $permissions =$em->getRepository('DataBundle:Permission')->findAll();
+        foreach ($permissions as $permission) {
+            $userPermission = new UserPermissions();
+            $userPermission->setUser($user);
+            $userPermission->setPermission($permission);
+            $em->persist($userPermission);
+            $em->flush();
+        } */
+        $this->addSql('insert  into `permissions_lists`(`id_permission_id`,`id_list_id`) values 
+(1,2),
+(1,3),
+(1,4),
+(1,5),
+(1,6),
+(2,2),
+(2,3),
+(2,4),
+(2,5),
+(2,6),
+(4,2),
+(5,2),
+(6,2),
+(6,5),
+(6,6),
+(7,2),
+(7,4),
+(7,5),
+(8,4),
+(9,2),
+(9,4),
+(9,5),
+(10,4),
+(11,4),
+(12,4),
+(13,4),
+(15,2),
+(16,5),
+(16,6),
+(18,4),
+(20,3),
+(24,4),
+(25,2),
+(25,3),
+(25,5),
+(25,6),
+(26,2),
+(26,4),
+(26,5),
+(26,6);');
         $this->addSql("
 insert  into `custom_translate`(`key_id`,`lang_key_id`,`value`) values 
 ('CONFLICT.AGGRESSIONS',1,'Agresiones'),
 ('CONFLICT.AGGRESSIONS',2,'Agressions'),
 ('CONFLICT.DISPUTES',1,'Disputas'),
-('CONFLICT.DISPUTES',2,'Disputes'),
+('CONFLICT.DISPUTES',2,'Disputes'),BOSS
 ('CONFLICT.DRUGS_CONSUMING',1,'Consumo de drogas'),
 ('CONFLICT.DRUGS_CONSUMING',2,'Drugs consuming'),
 ('CONFLICT.TOO_DRUNKED',1,'Consumo excesivo de alcohol'),
@@ -109,8 +161,8 @@ insert  into `custom_translate`(`key_id`,`lang_key_id`,`value`) values
 ('PERMISSION.IND.VIEW_STATS',1,'Ver estadísticas'),
 ('PERMISSION.MARKETING',1,'Marketing'),
 ('PERMISSION.MARKETING',2,'Marketing'),
-('PERMISSION.RESPONSABLE',1,'Responsable'),
-('PERMISSION.RESPONSABLE',2,'Responsable'),
+('PERMISSION.BOSS',1,'Jefe'),
+('PERMISSION.BOSS',2,'Boss'),
 ('PERMISSION.RRPP',1,'Relaciones públicas'),
 ('PERMISSION.RRPP',2,'Public relations'),
 ('PERMISSION.RRPP_BOSS',1,'Jefe de relaciones públicas'),
