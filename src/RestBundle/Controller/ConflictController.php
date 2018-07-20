@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations as Rest;
 
 /**
- * @Rest\Route("/conflictive/reasons")
+ * @Rest\Route("/crud/conflictive/reasons")
  */
 class ConflictController extends Controller
 {

@@ -114,4 +114,16 @@ class UserController extends Controller
         return $response->success("", $permissions);
     }
 
+    /**
+     * @Rest\Post("/all/table")
+     */
+    public function totalUsersAction(Request $request)
+    {
+        $params = $request->request->all();
+        $tables = $this->container->get("Tables");
+        $selectData = "DataBundle:User";
+        $mainOrder = array("column" => "id", "dir" => "ASC");
+        $data = $tables->generateTableResponse($params, $selectData, $mainOrder);
+        return $this->get('response')->success("", $data);
+    }
 }

@@ -10,12 +10,14 @@ use DataBundle\Entity\RateManageType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations as Rest;
-
+/**
+ * @Rest\Route("/crud")
+ */
 class RateController extends Controller
 {
 
     /**
-     * @Rest\Post("/table/rates")
+     * @Rest\Post("/rates/table")
      */
     public function clientsRatesCrudTableAction(Request $request)
     {
@@ -154,18 +156,9 @@ class RateController extends Controller
         }
 
         /* Check body */
-        try {
-            $body = $request->getContent();
-        } catch (\Exception $e) {
-            return $response->error(400, "DESERIALIZE_ERROR");
-        }
-        $rateInput = $layer->deserialize($body, "DataBundle\Entity\ClientEntrancePricing");
-        if (null === $rateInput) {
-            return $response->error(400, "DESERIALIZE_ERROR");
-        }
 
         $rateDB = $layer->getSingleResult('DataBundle:ClientEntrancePricing', [
-            "id" => $rateInput->getId()
+            "id" => $request->get("id")
         ]);
         
         if (null === $rateDB) {

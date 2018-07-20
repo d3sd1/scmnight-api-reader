@@ -70,9 +70,9 @@ class ClientController extends Controller
         }
         $clientDB->setEmail($clientInput->getEmail());
         $clientDB->setAddress($clientInput->getAddress());
-        try {
-            $newGender = $layer->getSingleResult("DataBundle:Gender", $clientInput->getGender()->getId());
-        } catch (\Exception $e) {
+        $newGender = $layer->getSingleResult("DataBundle:Gender", ['id' => $clientInput->getGender()->getId()]);
+
+        if(null === $newGender) {
             return $this->get('response')->error(400, "GENDER_NOT_FOUND");
         }
         $clientDB->setGender($newGender);

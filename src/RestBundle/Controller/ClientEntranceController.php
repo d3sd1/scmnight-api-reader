@@ -12,9 +12,9 @@ use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations as Rest;
 
 /**
- * @Rest\Route("/entrances")
+ * @Rest\Route("/client/entrances")
  */
-class EntranceController extends Controller
+class ClientEntranceController extends Controller
 {
 
 
@@ -29,7 +29,7 @@ class EntranceController extends Controller
     }
 
     /**
-     * @Rest\Post("/table/all")
+     * @Rest\Post("/all/table")
      */
     public function totalclientsAction(Request $request)
     {
@@ -42,7 +42,7 @@ class EntranceController extends Controller
     }
 
     /**
-     * @Rest\Post("/table/room")
+     * @Rest\Post("/room/table")
      */
     public function roomclientsAction(Request $request)
     {
