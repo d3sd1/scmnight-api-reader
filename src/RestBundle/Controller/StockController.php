@@ -13,17 +13,5 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 
 class StockController extends Controller
 {
-    /**
-     * @Rest\Post("/table")
-     */
-    public function stockCrudTableAction(Request $request)
-    {
-        $params = $request->request->all();
-        $tables = $this->container->get("RouteLoader");
-        $selectData = "DataBundle:StockItem";
-        $mainOrder = array("column" => "id", "dir" => "DESC");
-        $data = $tables->generateTableResponse($params, $selectData, $mainOrder);
-        return $this->get('response')->success("", $data);
-    }
 
 }

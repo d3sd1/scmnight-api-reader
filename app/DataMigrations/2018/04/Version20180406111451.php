@@ -59,15 +59,23 @@ class Version20180406111451 extends AbstractMigration
         $this->addSql('insert  into `permissions_list`(`list_key_name`) values ("RESPONSABLE"),("SECURITY"),("WAITER"),("MARKETING"),("RRPP_BOSS"),("RRPP"),("SCM")');
         $this->addSql('insert  into `custom_translate_available_langs`(id,`lang_key`) values (1,"es"),(2,"en")');
         $this->addSql("INSERT  INTO `custom_translate`(`key_id`,`value`,`lang_key_id`) VALUES
-                        ('CONFLICT.DISPUTES','Disputas',1),
-                        ('CONFLICT.DISPUTES','Disputes',2),
-                        ('CONFLICT.AGGRESSIONS','Agresiones',1),
-                        ('CONFLICT.AGGRESSIONS','Agressions',2),
-                        ('CONFLICT.DRUGS_CONSUMING','Consumo de drogas',1),
-                        ('CONFLICT.DRUGS_CONSUMING','Drugs consuming',2),
-                        ('CONFLICT.TOO_DRUNKED','Consumo excesivo de alcohol',1),
-                        ('EMAIL.RECOVERPASS.TITLE','Recupera tu contraseña',2),
-                        ('EMAIL.RECOVERPASS.CONTENT','Para proceder a recuperar tu cuenta, ingresa el código:',2)
+                            ('CONFLICT.AGGRESSIONS','Agresiones',1),
+                            ('CONFLICT.AGGRESSIONS','Agressions',2),
+                            ('CONFLICT.DISPUTES','Disputas',1),
+                            ('CONFLICT.DISPUTES','Disputes',2),
+                            ('CONFLICT.DRUGS_CONSUMING','Consumo de drogas',1),
+                            ('CONFLICT.DRUGS_CONSUMING','Drugs consuming',2),
+                            ('CONFLICT.TOO_DRUNKED','Consumo excesivo de alcohol',1),
+                            ('EMAIL.POWEREDBY','Local manejado por ',1),
+                            ('EMAIL.POWEREDBY','Powered by ',2),
+                            ('EMAIL.RECOVERPASS.CONTENT','Para proceder a recuperar tu cuenta, ingresa el código:',1),
+                            ('EMAIL.RECOVERPASS.CONTENT','Put this code inside the new form:',2),
+                            ('EMAIL.RECOVERPASS.SENDNEW.CONTENT','Aquí tienes tu nueva contraseña, podrás cambiarla una vez accedas al panel: ',1),
+                            ('EMAIL.RECOVERPASS.SENDNEW.CONTENT','There goes your new password, you would change it after login: ',2),
+                            ('EMAIL.RECOVERPASS.SENDNEW.TITLE','Nueva contraseña',1),
+                            ('EMAIL.RECOVERPASS.SENDNEW.TITLE','New password',2),
+                            ('EMAIL.RECOVERPASS.TITLE','Recupera tu contraseña',1),
+                            ('EMAIL.RECOVERPASS.TITLE','Recover password',2)
                         ");
         $this->addSql("insert  into `permissions`(`action`) values 
                             ('VIEW_DASHBOARD'),

@@ -17,155 +17,221 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 class SessionDataController extends Controller
 {
     /**
+     * Get disco basic information
      * @Rest\View()
      * @Rest\Get("/discoinfo")
      */
     public function sessionDiscoInfoAction(Request $request)
     {
-        $em = $this->get('doctrine.orm.entity_manager');
+        $layer = $this->get('rest.layer');
         /*
          * Manual data given here. Keep it manual.
          */
         $data = array(
-            "logo" => $em->getRepository('DataBundle:ExtraConfig')->findOneBy(["config" => "base64_logo"])->getValue(),
-            "discoName" => $em->getRepository('DataBundle:Config')->findOneBy(["config" => "disco_name"])->getValue()
+            "logo" => $layer->getSingleResult('DataBundle:ExtraConfig', ["config" => "base64_logo"])->getValue(),
+            "discoName" => $layer->getSingleResult('DataBundle:Config', ["config" => "disco_name"])->getValue()
         );
         return $this->get('response')->success("", $data);
     }
 
     /**
+     * Get all translations for given lang.
      * @Rest\View()
      * @Rest\Get("/translates/{langKey}")
      */
-    public function sessionTranslatesAction(Request $request)
+    public function sessionTranslateSingleAction(Request $request)
     {
-        $config = $this->get('doctrine.orm.entity_manager')
-            ->getRepository('DataBundle:CustomTranslate')
-            ->findBy(["langKey" => $request->get("langKey")]);
-        return $this->get('response')->success("", $config);
+        $layer = $this->get('rest.layer');
+        $translates = $layer->getSingleResult('DataBundle:CustomTranslate', ["langKey" => $request->get("langKey")]);
+        return $this->get('response')->success("", $translates);
     }
 
     /**
+     * Get all translations for all langs.
      * @Rest\View()
      * @Rest\Get("/translates")
      */
-    public function sessionTranslateGetAction(Request $request)
+    public function sessionTranslateMultiAction(Request $request)
     {
-        $config = $this->get('doctrine.orm.entity_manager')
-            ->getRepository('DataBundle:CustomTranslate')
-            ->findAll();
-        return $this->get('response')->success("", $config);
+        $layer = $this->get('rest.layer');
+        $translates = $layer->getAllResults('DataBundle:CustomTranslate');
+        return $this->get('response')->success("", $translates);
     }
+
     /**
+     * Modify a translation.
+     * @Rest\View()
+     * @Rest\Post("/translate")
+     */
+    public function sessionTranslateChangeSingleAction(Request $request)
+    {
+        $layer = $this->get('rest.layer');
+        $response = $this->get('response');
+        $permission = $this->get("permissions");
+        $em = $this->get('doctrine.orm.entity_manager');
+
+        /* Check actual user */
+        $user = $layer->getSessionUser();
+        if (null === $user) {
+            return $response->error(400, "USER_NOT_FOUND");
+        }
+
+        /* Check permissions */
+        if (!$permission->hasPermission("MANAGE_TRANSLATES", $user)) {
+            return $response->error(400, "NO_PERMISSIONS");
+        }
+
+        /* Check body */
+        try {
+            $body = $request->getContent();
+        } catch (\Exception $e) {
+            return $response->error(400, "DESERIALIZE_ERROR");
+        }
+        $translateInput = $layer->deserialize($body, "DataBundle\Entity\CustomTranslate");
+        if (null === $translateInput) {
+            return $response->error(400, "DESERIALIZE_ERROR");
+        }
+
+        $langKey = $layer->getSingleResult('DataBundle:CustomTranslateAvailableLangs', ["langKey" => $translateInput->getLangKey()->getLangKey()]);
+
+        if (null === $langKey) {
+            return $this->get('response')->error(400, "LANG_NOT_FOUND");
+        }
+        $customTranslateDB = $layer->getSingleResult('DataBundle:CustomTranslate', [
+            "keyId" => $translateInput->getKeyId(),
+            "langKey" => $langKey
+        ]);
+
+        /* Agregar clave dinámicamente, o actualizarla. */
+        if (null === $customTranslateDB) {
+            $translateInput->setLangKey($langKey);
+            $em->persist($translateInput);
+        } else {
+            $customTranslateDB->setValue($translateInput->getValue());
+        }
+        $em->flush();
+        $layer->wsPush($translateInput, "api_translations");
+        return $this->get('response')->success("LANG_KEY_UPDATED", $translateInput);
+    }
+
+
+    /**
+     * Modify translates multiple.
      * @Rest\View()
      * @Rest\Post("/translates")
      */
-    public function sessionTranslateChangeAction(Request $request)
-    {
-        $customTranslate = $this->container->get('jms_serializer')->deserialize($request->getContent(), "DataBundle\Entity\CustomTranslate", "json");
-        $em = $this->get('doctrine.orm.entity_manager');
-
-        $langKey = $em->getRepository('DataBundle:CustomTranslateAvailableLangs')->findOneBy(["langKey" => $customTranslate->getLangKey()->getLangKey()]);
-        if(null === $langKey){
-            return $this->get('response')->error(400, "LANG_NOT_FOUND");
-        }
-        $customTranslateDB = $em->getRepository('DataBundle:CustomTranslate')->findOneBy([
-            "keyId" => $customTranslate->getKeyId(),
-            "langKey" => $langKey
-        ]);
-        /* agregar clave dinámicamente */
-        if(null === $customTranslateDB)
-        {
-            $customTranslate->setLangKey($langKey);
-            $em->persist($customTranslate);
-        }
-        else{
-            $customTranslateDB->setValue($customTranslate->getValue());
-        }
-        $em->flush();
-        try {
-            $pusher = $this->container->get('websockets.pusher');
-            $pusher->push($this->container->get('jms_serializer')->serialize($customTranslate, "json"), 'api_translations');
-        } catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
-            $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
-        }
-        return $this->get('response')->success("LANG_KEY_UPDATED", $customTranslate);
-    }
-
-
-    /**
-     * @Rest\View()
-     * @Rest\Post("/translatesmulti")
-     */
     public function sessionTranslateChangeMultiAction(Request $request)
     {
-        $customTranslate = $this->container->get('jms_serializer')->deserialize($request->getContent(), "DataBundle\Entity\CustomTranslate", "json");
+        $layer = $this->get('rest.layer');
+        $response = $this->get('response');
+        $permission = $this->get("permissions");
         $em = $this->get('doctrine.orm.entity_manager');
 
-        $langKey = $em->getRepository('DataBundle:CustomTranslateAvailableLangs')->findOneBy(["langKey" => $customTranslate->getLangKey()->getLangKey()]);
-        if(null === $langKey){
-            return $this->get('response')->error(400, "LANG_NOT_FOUND");
+        /* Check actual user */
+        $user = $layer->getSessionUser();
+        if (null === $user) {
+            return $response->error(400, "USER_NOT_FOUND");
         }
-        $customTranslateDB = $em->getRepository('DataBundle:CustomTranslate')->findOneBy([
-            "keyId" => $customTranslate->getKeyId(),
-            "langKey" => $langKey
-        ]);
-        /* agregar clave dinámicamente */
-        if(null === $customTranslateDB)
-        {
-            $customTranslate->setLangKey($langKey);
-            $em->persist($customTranslate);
+
+        /* Check permissions */
+        if (!$permission->hasPermission("MANAGE_TRANSLATES", $user)) {
+            return $response->error(400, "NO_PERMISSIONS");
         }
-        else{
-            $customTranslateDB->setValue($customTranslate->getValue());
+
+        /* Check body */
+        try {
+            $body = $request->getContent();
+        } catch (\Exception $e) {
+            return $response->error(400, "DESERIALIZE_ERROR");
+        }
+        $allTranslatesInput = $layer->deserialize($body, "array<DataBundle\Entity\CustomTranslate>");
+        if (null === $allTranslatesInput) {
+            return $response->error(400, "DESERIALIZE_ERROR");
+        }
+
+        /* Iterate over translations */
+        foreach ($allTranslatesInput as $translateInput) {
+            $langKey = $layer->getSingleResult('DataBundle:CustomTranslateAvailableLangs', ["langKey" => $translateInput->getLangKey()->getLangKey()]);
+            if (null === $langKey) {
+                return $this->get('response')->error(400, "LANG_NOT_FOUND");
+            }
+            $customTranslateDB = $layer->getSingleResult('DataBundle:CustomTranslate', [
+                "keyId" => $translateInput->getKeyId(),
+                "langKey" => $langKey
+            ]);
+            /* Agregar clave dinámicamente, o actualizarla */
+            if (null === $customTranslateDB) {
+                $translateInput->setLangKey($langKey);
+                $em->persist($translateInput);
+            } else {
+                $customTranslateDB->setValue($translateInput->getValue());
+            }
+            $layer->wsPush($translateInput, "api_translations");
         }
         $em->flush();
-        try {
-            $pusher = $this->container->get('websockets.pusher');
-            $pusher->push($this->container->get('jms_serializer')->serialize($customTranslate, "json"), 'api_translations');
-        } catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
-            $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
-        }
-        return $this->get('response')->success("LANG_KEY_UPDATED", $customTranslate);
+        return $this->get('response')->success("", $allTranslatesInput);
     }
 
     /**
+     * Delete translates multiple.
      * @Rest\View()
-     * @Rest\Delete("/translatesmulti")
+     * @Rest\Delete("/translates")
      */
     public function sessionTranslateDeleteMultiAction(Request $request)
     {
-        $customTranslate = $this->container->get('jms_serializer')->deserialize($request->getContent(), "DataBundle\Entity\CustomTranslate", "json");
+        $layer = $this->get('rest.layer');
+        $response = $this->get('response');
+        $permission = $this->get("permissions");
         $em = $this->get('doctrine.orm.entity_manager');
 
-        $langKey = $em->getRepository('DataBundle:CustomTranslateAvailableLangs')->findOneBy(["langKey" => $customTranslate->getLangKey()->getLangKey()]);
-        if(null === $langKey){
-            return $this->get('response')->error(400, "LANG_NOT_FOUND");
+        /* Check actual user */
+        $user = $layer->getSessionUser();
+        if (null === $user) {
+            return $response->error(400, "USER_NOT_FOUND");
         }
-        $customTranslateDB = $em->getRepository('DataBundle:CustomTranslate')->findOneBy([
-            "keyId" => $customTranslate->getKeyId(),
-            "langKey" => $langKey
-        ]);
-        /* agregar clave dinámicamente */
-        if(null === $customTranslateDB)
-        {
-            return $this->get('response')->error(400, "LANG_KEY_NOT_FOUND");
+
+        /* Check permissions */
+        if (!$permission->hasPermission("MANAGE_TRANSLATES", $user)) {
+            return $response->error(400, "NO_PERMISSIONS");
         }
-        else{
-            $em->remove($customTranslateDB);
-            $em->flush();
-        }
+
+        /* Check body */
         try {
-            $pusher = $this->container->get('websockets.pusher');
-            $pusher->push($this->container->get('jms_serializer')->serialize($customTranslate, "json"), 'api_translations');
-        } catch (\Gos\Component\WebSocketClient\Exception\BadResponseException $e) {
-            $this->get('sendlog')->warning('Could not push logged out data to websockets due to offline server.');
+            $body = $request->getContent();
+        } catch (\Exception $e) {
+            return $response->error(400, "DESERIALIZE_ERROR");
         }
+        $allTranslatesInput = $layer->deserialize($body, "array<DataBundle\Entity\CustomTranslate>");
+        if (null === $allTranslatesInput) {
+            return $response->error(400, "DESERIALIZE_ERROR");
+        }
+
+        foreach ($allTranslatesInput as $translateInput) {
+            $langKey = $layer->getSingleResult('DataBundle:CustomTranslateAvailableLangs', ["langKey" => $translateInput->getLangKey()->getLangKey()]);
+            if (null === $langKey) {
+                return $this->get('response')->error(400, "LANG_NOT_FOUND");
+            }
+
+            $customTranslateDB = $layer->getSingleResult('DataBundle:CustomTranslate', [
+                "keyId" => $translateInput->getKeyId(),
+                "langKey" => $langKey
+            ]);
+            /* Eliminar clave */
+            if (null === $customTranslateDB) {
+                return $this->get('response')->error(400, "LANG_KEY_NOT_FOUND");
+            } else {
+                $customTranslateDB->setValue("");
+                $em->remove($customTranslateDB);
+            }
+            $layer->wsPush($translateInput, "api_translations");
+        }
+        $em->flush();
         return $this->get('response')->success("LANG_KEY_DELETE_SUCCESS");
     }
 
     /**
-     * @Rest\Post("/table/translates")
+     * View translates as a datatable.
+     * @Rest\Post("/translates/table")
      */
     public function translatesCrudTableAction(Request $request)
     {
@@ -178,26 +244,28 @@ class SessionDataController extends Controller
     }
 
     /**
+     * Get available translates.
      * @Rest\View()
-     * @Rest\Get("/translatesavailable")
+     * @Rest\Get("/translates/available")
      */
     public function sessionTranslatesAvailableAction(Request $request)
     {
-        $config = $this->get('doctrine.orm.entity_manager')
-            ->getRepository('DataBundle:CustomTranslateAvailableLangs')
-            ->findAll();
-        return $this->get('response')->success("", $config);
+        $layer = $this->get('rest.layer');
+        $translates = $layer->getAllResults('DataBundle:CustomTranslateAvailableLangs');
+        return $this->get('response')->success("", $translates);
     }
 
     /**
+     * Get default translate.
      * @Rest\View()
      * @Rest\Get("/translatedefault")
      */
     public function sessionTranslateDefaultAction(Request $request)
     {
-        $config = $this->get('doctrine.orm.entity_manager')
-            ->getRepository('DataBundle:CustomTranslate')
-            ->findBy(["langKey" => $request->get("langKey")]);
-        return $this->get('response')->success("", $config);
+        $layer = $this->get('rest.layer');
+        $translate = $layer->getSingleResult('DataBundle:CustomTranslate', [
+            "langKey" => $request->get("langKey")
+        ]);
+        return $this->get('response')->success("", $translate);
     }
 }

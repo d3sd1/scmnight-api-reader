@@ -146,7 +146,6 @@ class LoginController extends Controller
      */
     public function recoverAccountAction(Request $request)
     {
-
         $layer = $this->get('rest.layer');
         $response = $this->get('response');
         $permission = $this->get("permissions");
@@ -184,7 +183,7 @@ class LoginController extends Controller
                 ->orderBy('ur.dateExpires', 'DESC')
                 ->setParameter("user", $user)
         )[0];
-        if(null !== $prevPetition && !($prevPetition->getDateExpires() < (new \DateTime()))) {
+        if (null !== $prevPetition && !($prevPetition->getDateExpires() < (new \DateTime()))) {
             return $response->error(400, "RECOVER_WAIT_FOR_RESEND");
         }
 
@@ -203,7 +202,7 @@ class LoginController extends Controller
 
         /* Insertar código con fecha de expiración a la base de datos */
         $configSecondsToExpire = $layer->getSingleResult('DataBundle:Config', array("config" => "recover_code_seconds_expire"));
-        if(null === $configSecondsToExpire) {
+        if (null === $configSecondsToExpire) {
             return $response->error(400, "SERVER_NOT_CONFIGURED");
         }
         $secondsToExpire = $configSecondsToExpire->getValue();
@@ -216,64 +215,88 @@ class LoginController extends Controller
         $em->persist($code);
         $em->flush();
 
-
         /* Enviar correo de recuperación a la cuenta, en el idioma del usuario */
         $extraData = array();
         $extraData["code"] = $recoverCode;
-        $extraData["text_recover_pass_title"] = $layer->getTranslate("EMAIL.RECOVERPASS.TITLE",$user->getLangCode());
-        $extraData["text_recover_pass_content"] = $layer->getTranslate("EMAIL.RECOVERPASS.CONTENT",$user->getLangCode());
-        $extraData["copyright_powered"] = $layer->getTranslate("EMAIL.POWEREDBY",$user->getLangCode());
-        $this->get('mail')->send($user->getEmail(), "Recuperación de cuenta", "recover_account", $extraData, $extraData["text_recover_pass_content"] . " " .$recoverCode);
-
+        $extraData["text_recover_pass_title"] = $layer->getTranslate("EMAIL.RECOVERPASS.TITLE", $user->getLangCode());
+        $extraData["text_recover_pass_content"] = $layer->getTranslate("EMAIL.RECOVERPASS.CONTENT", $user->getLangCode());
+        $extraData["copyright_powered"] = $layer->getTranslate("EMAIL.POWEREDBY", $user->getLangCode());
+        $this->get('mail')->send($user->getEmail(), $layer->getTranslate("EMAIL.RECOVERPASS.TITLE", $user->getLangCode()), "recover_account", $extraData, $extraData["text_recover_pass_content"] . " " . $recoverCode);
 
         return $this->get('response')->success("RECOVER_EMAIL_SENT");
     }
 
-    //TODO: formatear esta funcion de abajo al modelo seguro.
     /**
      * Recover password step 2: use code
      * @Rest\Post("/recover/code")
      */
     public function recoverAccountCodeAction(Request $request)
     {
-        $code = $request->request->get("code");
-        if ($code == null || $code == "") {
-            return $this->get('response')->error(400, "NO_DATA_PROVIDED");
-        }
+        $layer = $this->get('rest.layer');
+        $response = $this->get('response');
+        $permission = $this->get("permissions");
         $em = $this->get('doctrine.orm.entity_manager');
-        $recover = $em->getRepository('DataBundle:UserRecover')->findOneByCode($code);
 
-        if (!$recover || $recover === null) {
-            return $this->get('response')->error(400, "NO_RECOVER_FOUND");
-        } else if ($recover->getDateExpires() <= (new \DateTime("now"))) {
-            $user = $em->getRepository('DataBundle:User')->findOneByDni($recover->getUser()->getDni());
-            /* Delete account recover codes */
-            $em->getRepository('DataBundle:UserRecover')
-                ->createQueryBuilder('ur')
-                ->delete()
-                ->where('ur.user = :user')
-                ->setParameter("user", $user)
-                ->getQuery()
-                ->getResult();
-            $this->get('response')->error(400, "RECOVER_CODE_EXPIRED");
-        } else {
-            $user = $em->getRepository('DataBundle:User')->findOneByDni($recover->getUser()->getDni());
-            /* Generar contraseña aleatoria */
-            $newPass = (new Random())->randomAlphaNumeric(rand(8, 30));
-            $this->get('encoder')->setUserPassword($user, $newPass);
-            /* Delete account recover codes */
-            $em->getRepository('DataBundle:UserRecover')
-                ->createQueryBuilder('ur')
-                ->delete()
-                ->where('ur.user = :user')
-                ->setParameter("user", $user)
-                ->getQuery()
-                ->getResult();
-
-            /* Actualizar contraseña del usuario en la db */
-            $em->flush();
-            $this->get('mail')->send($user->getEmail(), "Nueva contraseña", "recover_account_newpass", array('newpass' => $newPass));
+        /* Check body */
+        try {
+            $body = $request->getContent();
+        } catch (\Exception $e) {
+            return $response->error(400, "DESERIALIZE_ERROR");
         }
+        $inputCode = $layer->deserialize($body, "DataBundle\Entity\UserRecover");
+        if (null === $inputCode) {
+            return $response->error(400, "DESERIALIZE_ERROR");
+        }
+
+        /* Check actual code */
+        $recoverCode = $layer->getSingleResult('DataBundle:UserRecover', ["code" => $inputCode->getCode()]);
+        if (null === $recoverCode) {
+            return $response->error(400, "RECOVER_CODE_NOT_FOUND");
+        }
+
+        /* Check permissions */
+        if (!$permission->hasPermission("RECOVER_PASSWORD", $recoverCode->getUser())) {
+            return $response->error(400, "NO_PERMISSIONS");
+        }
+
+        /* Check code expiration */
+        $user = $layer->getSingleResult('DataBundle:User', ['dni' => $recoverCode->getUser()->getDni()]);
+        if ($recoverCode->getDateExpires() <= (new \DateTime("now"))) {
+            /* Delete account recover codes */
+            $layer->getComplexResult(
+                $em->getRepository('DataBundle:UserRecover')
+                    ->createQueryBuilder('ur')
+                    ->delete()
+                    ->where('ur.user = :user')
+                    ->setParameter("user", $user)
+            );
+            $this->get('response')->error(400, "RECOVER_CODE_EXPIRED");
+        }
+
+        /* Reset user password */
+        $newPass = (new Random())->randomAlphaNumeric(rand(8, 30));
+        $this->get('encoder')->setUserPassword($user, $newPass);
+        /* Delete account recover codes */
+        $layer->getComplexResult(
+            $em->getRepository('DataBundle:UserRecover')
+                ->createQueryBuilder('ur')
+                ->delete()
+                ->where('ur.user = :user')
+                ->setParameter("user", $user)
+        );
+        $em->flush();
+
+        /* SEND EMAIL */
+
+        /* Enviar correo de recuperación a la cuenta, en el idioma del usuario */
+        $extraData = array();
+        $extraData["newpass"] = $newPass;
+        $extraData["text_recover_newpass_title"] = $layer->getTranslate("EMAIL.RECOVERPASS.SENDNEW.TITLE", $user->getLangCode());
+        $extraData["text_recover_newpass_content"] = $layer->getTranslate("EMAIL.RECOVERPASS.SENDNEW.CONTENT", $user->getLangCode());
+        $extraData["copyright_powered"] = $layer->getTranslate("EMAIL.POWEREDBY", $user->getLangCode());
+
+        $this->get('mail')->send($user->getEmail(), $extraData["text_recover_newpass_title"], "recover_account_newpass", $extraData, $extraData["text_recover_newpass_content"] . " " . $newPass);
+
         return $this->get('response')->success("RECOVER_ACCOUNT_SUCCESS");
     }
 
