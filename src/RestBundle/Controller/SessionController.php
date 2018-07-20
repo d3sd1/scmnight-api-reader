@@ -151,13 +151,15 @@ class SessionController extends Controller
 
         /* Iterate over translations */
         foreach ($allTranslatesInput as $translateInput) {
+
             $langKey = $layer->getSingleResult('DataBundle:CustomTranslateAvailableLangs', ["langKey" => $translateInput->getLangKey()->getLangKey()]);
+
             if (null === $langKey) {
                 return $this->get('response')->error(400, "LANG_NOT_FOUND");
             }
             $customTranslateDB = $layer->getSingleResult('DataBundle:CustomTranslate', [
                 "keyId" => $translateInput->getKeyId(),
-                "langKey" => $langKey
+                "langKey" => $langKey->getId()
             ]);
             /* Agregar clave dinámicamente, o actualizarla */
             if (null === $customTranslateDB) {
@@ -208,25 +210,24 @@ class SessionController extends Controller
 
         foreach ($allTranslatesInput as $translateInput) {
             $langKey = $layer->getSingleResult('DataBundle:CustomTranslateAvailableLangs', ["langKey" => $translateInput->getLangKey()->getLangKey()]);
+
             if (null === $langKey) {
                 return $this->get('response')->error(400, "LANG_NOT_FOUND");
             }
-
             $customTranslateDB = $layer->getSingleResult('DataBundle:CustomTranslate', [
                 "keyId" => $translateInput->getKeyId(),
-                "langKey" => $langKey
+                "langKey" => $langKey->getId()
             ]);
-            /* Eliminar clave */
-            if (null === $customTranslateDB) {
-                return $this->get('response')->error(400, "LANG_KEY_NOT_FOUND");
-            } else {
+
+            /* Eliminar clave, si existe. Si no, no devolver error, procesar el resto. */
+            if (null !== $customTranslateDB) {
                 $customTranslateDB->setValue("");
                 $em->remove($customTranslateDB);
             }
             $layer->wsPush($translateInput, "api_translations");
         }
         $em->flush();
-        return $this->get('response')->success("LANG_KEY_DELETE_SUCCESS");
+        return $this->get('response')->success("");
     }
 
     /**

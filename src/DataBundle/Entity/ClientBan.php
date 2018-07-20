@@ -19,7 +19,7 @@ class ClientBan
      * @ORM\Id
      * @Serializer\Expose()
      * @ORM\ManyToOne(targetEntity="\DataBundle\Entity\ClientBanType"))
-     * @ORM\JoinColumn(name="ban", referencedColumnName="id")
+     * @ORM\JoinColumn(name="ban", referencedColumnName="id", onDelete="CASCADE")
      */
     private $ban;
 

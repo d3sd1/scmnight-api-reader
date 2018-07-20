@@ -18,7 +18,7 @@ class ConflictController extends Controller
 {
 
     /**
-     * @Rest\Get("/")
+     * @Rest\Get()
      */
     public function getConflictsAction(Request $request)
     {
@@ -29,7 +29,7 @@ class ConflictController extends Controller
 
 
     /**
-     * @Rest\Post("/")
+     * @Rest\Post()
      */
     public function postConflictAction(Request $request)
     {
@@ -83,7 +83,7 @@ class ConflictController extends Controller
     }
 
     /**
-     * @Rest\Put("/")
+     * @Rest\Put()
      */
     public function putConflictAction(Request $request)
     {
@@ -153,18 +153,7 @@ class ConflictController extends Controller
             return $response->error(400, "NO_PERMISSIONS");
         }
 
-        /* Check body */
-        try {
-            $body = $request->getContent();
-        } catch (\Exception $e) {
-            return $response->error(400, "DESERIALIZE_ERROR");
-        }
-        $conflictInput = $layer->deserialize($body, "DataBundle\Entity\ClientBanType");
-        if (null === $conflictInput) {
-            return $response->error(400, "DESERIALIZE_ERROR");
-        }
-
-        $conflictReasonDB = $layer->getSingleResult('DataBundle:ClientBanType', ["name" => $conflictInput->getName()]);
+        $conflictReasonDB = $layer->getSingleResult('DataBundle:ClientBanType', ["id" => $request->get("id")]);
         if (null === $conflictReasonDB) {
             return $this->get('response')->error(400, "CONFLICTREASON_NOT_FOUND");
         }
