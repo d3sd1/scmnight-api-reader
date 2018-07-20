@@ -108,16 +108,16 @@ class PermissionsListController extends Controller
 
         $primaryUserDb = $layer->getSingleResult('DataBundle:User', ["id" => $request->get("id")]);
 
-        /* Clear previous permissions :)
+        /* Clear previous permissions :) */
         $em->getRepository('DataBundle:UserPermissions')
             ->createQueryBuilder('pl')
             ->delete()
             ->where('pl.user = :user')
             ->setParameter("user", $primaryUserDb->getId())->getQuery()->getResult();
-*/
+
         foreach ($permissionsLists as $permission) {
 
-            $permissionDB = $layer->getSingleResult('DataBundle:Permission', ["id" => $permission()->getId()]);
+            $permissionDB = $layer->getSingleResult('DataBundle:Permission', ["id" => $permission->getId()]);
             if (null === $permissionDB) {
                 return $this->get('response')->error(400, "PERMISSION_NOT_FOUND");
             }
@@ -131,7 +131,7 @@ class PermissionsListController extends Controller
             }
 
             $relation = new UserPermissions();
-            $relation->setIdPermission($permissionDB);
+            $relation->setPermission($permissionDB);
             $relation->setUser($primaryUserDb);
             $em->persist($relation);
             $em->flush();
