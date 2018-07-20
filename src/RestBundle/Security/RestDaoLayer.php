@@ -147,6 +147,7 @@ class RestDaoLayer
             $data = $complexQuery->getQuery()->getResult();
 
         } catch (\Exception $e) {
+            var_dump($e->getMessage());die();
             $data = null;
             $this->container->get('sendlog')->warning('GET COMPLEX RESULT QUERY FAILED: ' . $e->getMessage());
         }

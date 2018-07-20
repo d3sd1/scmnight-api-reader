@@ -19,7 +19,6 @@ class User implements UserInterface
     /**
      * @var int
      *
-     * @Exclude
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
