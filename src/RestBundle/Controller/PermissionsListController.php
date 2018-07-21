@@ -136,17 +136,6 @@ class PermissionsListController extends Controller
             $em->persist($relation);
             $em->flush();
         }
-        /* tiempo real despues xd
-        $manage = new PermissionListManage();
-        $manage->setPermissionList($input);
-        $manage->setUser($layer->getSessionUser());
-        $manage->setType($layer->getSingleResult('DataBundle:PermissionListManageType', ["name" => "ADD"]));
-        $em->persist($manage);
-        $em->flush();
-        $layer->wsPush($manage, 'api_manage_permissions');
-        $em->flush();
-    }
-    /* First: Clear actual permissions for the list */
 
         return $this->get('response')->success("PERMISSIONLIST_CREATED");
     }
@@ -218,16 +207,6 @@ class PermissionsListController extends Controller
             $relation->setIdPermission($permissionDB);
             $relation->setIdList($permissionListDB);
             $em->persist($relation);
-            $em->flush();
-        }
-            /* tiempo real despues xd
-            $manage = new PermissionListManage();
-            $manage->setPermissionList($input);
-            $manage->setUser($layer->getSessionUser());
-            $manage->setType($layer->getSingleResult('DataBundle:PermissionListManageType', ["name" => "ADD"]));
-            $em->persist($manage);
-            $em->flush();
-            $layer->wsPush($manage, 'api_manage_permissions');
             $em->flush();
         }
         /* First: Clear actual permissions for the list */
