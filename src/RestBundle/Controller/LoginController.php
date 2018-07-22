@@ -175,14 +175,20 @@ class LoginController extends Controller
         }
 
         /* Check there are no petitions on last 30 mins */
-        $prevPetition = $layer->getComplexResult(
+        $prevPetitions = $layer->getComplexResult(
             $em->getRepository('DataBundle:UserRecover')
                 ->createQueryBuilder('ur')
                 ->where('ur.user = :user')
                 ->setMaxResults(1)
                 ->orderBy('ur.dateExpires', 'DESC')
                 ->setParameter("user", $user)
-        )[0];
+        );
+        if(array_key_exists(0, $prevPetitions)) {
+            $prevPetition = $prevPetitions[0];
+        }
+        else {
+            $prevPetition = null;
+        }
         if (null !== $prevPetition && !($prevPetition->getDateExpires() < (new \DateTime()))) {
             return $response->error(400, "RECOVER_WAIT_FOR_RESEND");
         }
