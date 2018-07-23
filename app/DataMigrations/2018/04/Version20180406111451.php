@@ -61,6 +61,7 @@ class Version20180406111451 extends AbstractMigration
         $this->addSql('insert  into `nationalities`(`name`) values ("ES")');
         $this->addSql('insert  into `permissions_list`(id,`list_key_name`) values (1,"BOSS"),(6,"SECURITY"),(3,"WAITER"),(4,"MARKETING"),(5,"RRPP_BOSS"),(2,"RRPP")');
         $this->addSql('insert  into `custom_translate_available_langs`(id,`lang_key`) values (1,"es"),(2,"en")');
+        $this->addSql("insert  into `user_chat_status`(chat_status) values ('IDLE'),('OFFLINE'),('ONLINE');");
         /* LISTAS DE PERMISOS PARA PERMISOS - GRUPOS DE PERMISOS. AL JEFE LE METEMOS T0DOS
 
         TODO

@@ -95,6 +95,29 @@ class User implements UserInterface
     private $langCode;
 
     /**
+     * @ORM\ManyToOne(targetEntity="\DataBundle\Entity\UserChatStatus"))
+     * @ORM\JoinColumn()
+     */
+    private $chatStatus;
+
+    /**
+     * @return mixed
+     */
+    public function getChatStatus()
+    {
+        return $this->chatStatus;
+    }
+
+    /**
+     * @param mixed $chatStatus
+     */
+    public function setChatStatus($chatStatus)
+    {
+        $this->chatStatus = $chatStatus;
+    }
+
+
+    /**
      * Get id
      *
      * @return int
