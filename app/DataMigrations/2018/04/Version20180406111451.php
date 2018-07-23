@@ -99,6 +99,7 @@ class Version20180406111451 extends AbstractMigration
                             ('MANAGE_TRANSLATES'),
                             ('MANAGE_STOCK_TYPES'),
                             ('RECOVER_PASSWORD'),
+                            ('USE_CHAT'),
                             ('LOGOUT');");
         $this->addSql('insert  into `permissions_lists`(`id_permission_id`,`id_list_id`) values 
 (1,1),
@@ -170,7 +171,13 @@ class Version20180406111451 extends AbstractMigration
 (26,3),
 (26,4),
 (26,5),
-(26,6);');
+(26,6),
+(27,1),
+(27,2),
+(27,3),
+(27,4),
+(27,5),
+(27,6);');
         $this->addSql("
 insert  into `custom_translate`(`key_id`,`lang_key_id`,`value`) values 
 ('CONFLICT.AGGRESSIONS',1,'Agresiones'),
