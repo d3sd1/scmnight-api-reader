@@ -66,6 +66,7 @@ gos_web_socket:
         - "@sockets.config.logo"
         - "@sockets.translations"
         - "@sockets.permissionslist.manage"
+        - "@sockets.chat.users"
     shared_config: false
     server:
         port: '%websocket_port%'

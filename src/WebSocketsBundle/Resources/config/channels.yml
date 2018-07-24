@@ -34,6 +34,10 @@ api_logo:
     channel: scm/config_logo
     handler:
         callback: 'logo.config.topic'
+chat_users:
+    channel: scm/chat_users
+    handler:
+        callback: 'chat.users.topic'
 api_conflictreasons:
     channel: scm/conflictreasons_manage
     handler:

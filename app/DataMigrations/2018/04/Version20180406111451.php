@@ -61,7 +61,7 @@ class Version20180406111451 extends AbstractMigration
         $this->addSql('insert  into `nationalities`(`name`) values ("ES")');
         $this->addSql('insert  into `permissions_list`(id,`list_key_name`) values (1,"BOSS"),(6,"SECURITY"),(3,"WAITER"),(4,"MARKETING"),(5,"RRPP_BOSS"),(2,"RRPP")');
         $this->addSql('insert  into `custom_translate_available_langs`(id,`lang_key`) values (1,"es"),(2,"en")');
-        $this->addSql("insert  into `user_chat_status`(chat_status) values ('IDLE'),('OFFLINE'),('ONLINE');");
+        $this->addSql("insert  into `user_chat_status`(chat_status) values (3,'IDLE'),(2,'OFFLINE'),(1,'ONLINE');");
         /* LISTAS DE PERMISOS PARA PERMISOS - GRUPOS DE PERMISOS. AL JEFE LE METEMOS T0DOS
 
         TODO
@@ -236,6 +236,8 @@ insert  into `custom_translate`(`key_id`,`lang_key_id`,`value`) values
 ('PERMISSION.SECURITY',2,'Security'),
 ('PERMISSION.WAITER',1,'Camarero'),
 ('PERMISSION.WAITER',2,'Waiter');
+('PERMISSION.IND.USE_CHAT',1,'Usar chat');
+('PERMISSION.IND.USE_CHAT',2,'Use chat');
                         ");
     }
 

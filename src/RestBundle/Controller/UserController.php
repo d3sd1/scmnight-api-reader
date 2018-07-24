@@ -75,6 +75,7 @@ class UserController extends Controller
         $user->setAddress($userInput->getAddress());
         $user->setTelephone($userInput->getTelephone());
         $user->setLangCode($userInput->getLangCode());
+        $user->setChatNotifications($userInput->isChatNotifications());
 
         $em->flush();
         return $this->get('response')->success("PROFILE_EDIT_SUCCESS");

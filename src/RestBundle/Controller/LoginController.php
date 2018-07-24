@@ -108,6 +108,10 @@ class LoginController extends Controller
         $loginLog->setLat($lat);
         $loginLog->setLng($lng);
         $em->persist($loginLog);
+
+        /* Set user chat connected */
+        $userDB->setChatStatus($layer->getSingleResult('DataBundle:UserChatStatus', array('chatStatus' => 'ONLINE')));
+        $layer->wsPush($userDB, "chat_users");
         $em->flush();
         return $this->get('response')->success("LOGIN_SUCCESS", $authToken);
     }
@@ -132,7 +136,12 @@ class LoginController extends Controller
         if ($authToken && $authToken->getUser()->getId() === $layer->getSessionUser()->getId()) {
             $this->get('security.token_storage')->setToken(null);
             $em->remove($authToken);
+
+            /* Set user disconnected of chat */
+            $user->setChatStatus($layer->getSingleResult('DataBundle:UserChatStatus', array('chatStatus' => 'OFFLINE')));
+            $layer->wsPush($user, "chat_users");
             $em->flush();
+
             return $this->get('response')->success("SESSION_CLOSE_SUCCESS");
         } else {
             return $this->get('response')->error(403, "USER_HAS_NO_PERMISSIONS");

@@ -27,6 +27,9 @@ services:
         class: WebSocketsBundle\Topic\TranslationsTopic
     sockets.permissionslist.manage:
         class: WebSocketsBundle\Topic\PermissionsListTopic
+    sockets.chat.users:
+        arguments: [ "@doctrine.orm.entity_manager" , "@service_container", '@rest.layer']
+        class: WebSocketsBundle\Topic\ChatUsersTopic
 
     gos_web_socket_server.client_event.listener:
         class: WebSocketsBundle\EventListener\ConnectionListener

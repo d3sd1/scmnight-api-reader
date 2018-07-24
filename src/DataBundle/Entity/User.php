@@ -101,6 +101,28 @@ class User implements UserInterface
     private $chatStatus;
 
     /**
+     * @var boolean
+     * @ORM\Column(type="boolean", nullable=false, options={"default": false})
+     */
+    private $chatNotifications;
+
+    /**
+     * @return bool
+     */
+    public function isChatNotifications()
+    {
+        return $this->chatNotifications;
+    }
+
+    /**
+     * @param bool $chatNotifications
+     */
+    public function setChatNotifications($chatNotifications)
+    {
+        $this->chatNotifications = $chatNotifications;
+    }
+
+    /**
      * @return mixed
      */
     public function getChatStatus()
