@@ -47,7 +47,6 @@ parameters:
     web_default_token_ttl: 1800
     web_extended_token_ttl: 3600
     app_token_ttl: 86400
-    version: 0.5.0
     
 gos_web_socket:
     topics:

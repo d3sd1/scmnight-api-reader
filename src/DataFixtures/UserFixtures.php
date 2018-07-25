@@ -23,6 +23,8 @@ class UserFixtures implements ORMFixtureInterface
         $user->setAddress("C/ Test");
         $user->setTelephone("6786858475");
         $user->setLangCode("es");
+        $user->setChatNotifications(true);
+        $user->setChatStatus($manager->getRepository("DataBundle:UserChatStatus")->findOneBy(["chatStatus" => "OFFLINE"]));
         $manager->persist($user);
         $manager->flush();
         $permissions = $manager->getRepository('DataBundle:Permission')->findAll();
