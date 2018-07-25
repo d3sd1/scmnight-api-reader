@@ -33,7 +33,8 @@
         "gos/web-socket-bundle": "^1.8.12",
         "jms/serializer": "^1.11",
         "doctrine/doctrine-fixtures-bundle": "^3.0.2",
-        "doctrine/doctrine-migrations-bundle": "^v1.3.1",
+        "doctrine/doctrine-migrations-bundle": "^v0.4.0",
+        "react/zmq": "^v1.3.1",
         "jms/serializer-bundle": "^2.3"
     },
     "require-dev": {
@@ -42,7 +43,7 @@
     },
     "scripts": {
         "dev-install": [
-            "composer update ",
+            "composer update",
             "php bin/console cache:clear --no-debug",
             "php bin/console doctrine:database:drop --force --if-exists --no-interaction",
             "php bin/console doctrine:database:create --if-not-exists --no-interaction",
