@@ -22,9 +22,16 @@ class Nationality
     /**
      * @var string
      *
-     * @ORM\Column(name="name", type="string", length=2, unique=true)
+     * @ORM\Column(type="string")
      */
-    private $name;
+    private $code;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string")
+     */
+    private $country;
 
     /**
      * @return mixed
@@ -37,7 +44,7 @@ class Nationality
     /**
      * @param mixed $id
      */
-    public function setId($id): void
+    public function setId($id)
     {
         $this->id = $id;
     }
@@ -45,16 +52,35 @@ class Nationality
     /**
      * @return string
      */
-    public function getName(): string
+    public function getCode()
     {
-        return $this->name;
+        return $this->code;
     }
 
     /**
-     * @param string $name
+     * @param string $code
      */
-    public function setName(string $name): void
+    public function setCode($code)
     {
-        $this->name = $name;
+        $this->code = $code;
     }
+
+    /**
+     * @return string
+     */
+    public function getCountry()
+    {
+        return $this->country;
+    }
+
+    /**
+     * @param string $country
+     */
+    public function setCountry($country)
+    {
+        $this->country = $country;
+    }
+
+
+
 }

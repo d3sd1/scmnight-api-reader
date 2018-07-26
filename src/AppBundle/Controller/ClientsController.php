@@ -221,7 +221,7 @@ class ClientsController extends Controller
         $client->setSurname1($personData["surname1"]);
         $client->setSurname2($personData["surname2"]);
         $client->setName($personData["name"]);
-        $client->setNationality($em->getRepository('DataBundle:Nationality')->findOneBy(["name" => $personData["nationality"]]));
+        $client->setNationality($em->getRepository('DataBundle:Nationality')->findOneBy(["code" => $personData["nationality"]]));
         $client->setBirthdate($personData["birthdate"]);
         $response = new JsonResponse();
         $response->setContent($this->container->get('jms_serializer')->serialize($client, "json"));
