@@ -38,7 +38,7 @@
         "jms/serializer-bundle": "^2.3"
     },
     "require-dev": {
-        "symfony/phpunit-bridge": "^4.0.3",
+        "symfony/phpunit-bridge": "^4.1.12",
         "neronmoon/scriptsdev": "^0.1.2"
     },
     "scripts": {
